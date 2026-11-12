@@ -2,7 +2,7 @@
 
 Flags made to fly. A free online flag maker for worldbuilders, writers, roleplayers and vexillology nerds: make a flag in four choices or layer by layer, have it checked against the principles of good flag design, and download it as SVG or PNG. Made by [Eurth](https://eurth.org), as a sibling of [Governmint](https://gov.eurth.org).
 
-Live page: https://flag.eurth.org (not deployed yet; see [roadmap.md](roadmap.md), Next)
+Live page: https://flag.eurth.org
 
 Status: preview. See the [roadmap](roadmap.md) for what's next, what each release added and what's not planned.
 

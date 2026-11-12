@@ -6,7 +6,8 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Next
 
-- **Go live:** create the `eurth-org/eurth-flag` repository, deploy the Worker to flag.eurth.org, add the `CLOUDFLARE_API_TOKEN` secret for automatic deploys, submit the sitemap in Search Console, and add Flagwright to status.eurth.org and Eurth's Worldbuilding Tools docs.
+- **Automatic deploys:** add the `CLOUDFLARE_API_TOKEN` secret (see the README); until then, releases are deployed by hand with `npm run deploy`.
+- **Launch:** submit the sitemap in Search Console, add Flagwright to status.eurth.org and Eurth's Worldbuilding Tools docs, and announce it on the forum and Discord.
 - **Heraldic charges drawn for Flagwright:** lion, eagle, fleur-de-lis, sword, trident, laurel wreath, hammer and sickle. Font Awesome has none of them, and flags want them.
 - **Outlines (fimbriation) as a setting** on any layer, instead of laying a thicker copy beneath.
 - **Your own emblem:** upload an SVG or PNG as a layer (kept in the browser, embedded in the download).
@@ -32,6 +33,7 @@ The first version.
 - Undo and redo, and flags saved on the device.
 - **Pages for search engines and newcomers:** the maker with how-to and questions, 18 templates, a guide to the five principles with good and bad examples, and a glossary of 36 flag terms with pictures. Structured data on each (WebApplication, HowTo, FAQPage, Article, DefinedTermSet, BreadcrumbList), a sitemap, canonical addresses, and link previews with a sharing image.
 - **The look of gov.eurth.org:** Eurth blue bars, the Deluminator switch (light, dark, auto), Font Awesome icons, panels and pills, and a logo: the Eurth yurt on a flag.
+- **Live** at flag.eurth.org since 12 November 2026, from the public repository eurth-org/eurth-flag.
 - **The kit:** an Astro static site with the tool as a Svelte island, on Cloudflare Workers static assets; a strict Content-Security-Policy with script hashes written by the build and checked by a test; a service worker for offline use; a web app manifest and icons; tests for the engine, links, design check, colour contrast and headers.
 
 ## Not planned
