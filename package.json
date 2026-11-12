@@ -1,0 +1,33 @@
+{
+  "name": "eurth-flag",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Flagwright: a free online flag maker for worldbuilders and vexillology nerds, by Eurth. Static Astro site with a Svelte tool, on Cloudflare Workers.",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node tools/postbuild.mjs",
+    "preview": "npm run build && wrangler dev",
+    "check": "astro check",
+    "test": "vitest run",
+    "images": "node tools/make-images.mjs",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/svelte": "^9.1.5",
+    "@fortawesome/free-brands-svg-icons": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "astro": "^7.4.11",
+    "svelte": "^5.57.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.160.1"
+  }
+}

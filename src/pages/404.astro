@@ -1,0 +1,54 @@
+---
+// Flagwright's 404: no flag flies here.
+import Flag from '../components/Flag.astro';
+import type { Flag as FlagData } from '../flag/model';
+import Base from '../layouts/Base.astro';
+
+// A white flag: the page surrenders.
+const white: FlagData = { ratio: [2, 3], division: { type: 'bands', dir: 'h', bands: [{ color: '#ffffff', weight: 1 }] }, overlays: [] };
+---
+
+<Base title="Unclaimed territory" description="This page doesn't exist. No flag has been planted here yet." noindex>
+  <div class="page lost">
+    <div class="white"><Flag flag={white} id="white" title="A plain white flag" /></div>
+    <h1>Unclaimed territory</h1>
+    <p>No flag has been planted on this page. We surrender: it doesn't exist, or it moved.</p>
+    <p><a class="btn btn-primary cta" href="/">Plant a flag</a></p>
+  </div>
+</Base>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-8);
+    text-align: center;
+  }
+
+  .lost h1 {
+    margin: var(--space-3) 0 0;
+  }
+
+  .lost p {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .white {
+    width: 180px;
+    transform-origin: 0 50%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .white {
+      animation: wave 3s ease-in-out infinite;
+    }
+  }
+
+  @keyframes wave {
+    50% {
+      transform: skewY(-4deg) scaleX(0.96);
+    }
+  }
+</style>

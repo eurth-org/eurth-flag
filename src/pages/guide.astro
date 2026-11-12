@@ -1,0 +1,215 @@
+---
+// How to design a good flag: the five principles, each with a flag that follows it and one
+// that doesn't, drawn by the same engine as the maker.
+import Flag from '../components/Flag.astro';
+import { encodeFlag, encodeSimple } from '../flag/link';
+import { newOverlay, type Flag as FlagData } from '../flag/model';
+import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
+import Base from '../layouts/Base.astro';
+import { ref, site, wikipedia } from '../lib/site';
+
+const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', ...changes });
+
+const simpleGood = s({ division: 'solid', colors: ['#0a1f5c', '#ffffff', '#fcd116'], symbol: 'sun', symbolColor: '#ffb81c', scale: 'l' });
+const busy: FlagData = {
+  ...fromSimple(s({ division: 'h9', colors: ['#0a1f5c', '#6cace4', '#ffffff'] })),
+  overlays: [
+    newOverlay('border', '#ffb81c', { thickness: 6 }),
+    newOverlay('rect', '#7b1e2b', { x: 25, y: 30, w: 40, h: 45 }),
+    newOverlay('emblem', '#ffffff', { icon: 'crown', x: 25, y: 22, size: 16 }),
+    newOverlay('emblem', '#fcd116', { icon: 'wheat-awn', x: 17, y: 40, size: 14 }),
+    newOverlay('emblem', '#fcd116', { icon: 'anchor', x: 33, y: 40, size: 14 }),
+    newOverlay('starRing', '#ffffff', { x: 72, y: 50, size: 40, count: 9, starSize: 6 }),
+    newOverlay('emblem', '#ce1126', { icon: 'dragon', x: 72, y: 50, size: 18 }),
+  ],
+};
+const meaning = s({ division: 'h2', colors: ['#6cace4', '#009739', '#ffffff'], symbol: 'e-mountain', symbolColor: '#ffffff', scale: 'm' });
+const colorsGood = s({ division: 'v-pale', colors: ['#ce1126', '#ffffff', '#ce1126'], symbol: 'e-leaf', symbolColor: '#ce1126', scale: 'm' });
+const colorsBad = s({ division: 'h3', colors: ['#7b1e2b', '#5c2d91', '#0a1f5c'], symbol: 'star5', symbolColor: '#6b3f1d', scale: 'm' });
+const sealGood = s({ division: 'solid', colors: ['#005c2e', '#ffffff', '#fcd116'], symbol: 'e-tree', symbolColor: '#ffffff', scale: 'l' });
+const seal: FlagData = {
+  ...fromSimple(s({ division: 'solid', colors: ['#0038a8', '#ffffff', '#fcd116'] })),
+  overlays: [
+    newOverlay('disc', '#ffffff', { size: 62 }),
+    newOverlay('ring', '#ffb81c', { size: 62, thickness: 3 }),
+    newOverlay('starRing', '#0038a8', { size: 50, count: 24, starSize: 3 }),
+    newOverlay('emblem', '#0038a8', { icon: 'landmark-dome', y: 44, size: 22 }),
+    newOverlay('emblem', '#ffb81c', { icon: 'wheat-awn', x: 44, y: 62, size: 10 }),
+    newOverlay('emblem', '#ffb81c', { icon: 'wheat-awn', x: 56, y: 62, size: 10, mirror: true }),
+  ],
+};
+const distinct = s({ division: 'bend-up', colors: ['#fcd116', '#00847e', '#ffffff'], overlay: 'bend-sinister', overlayColor: '#000000' });
+const twin = s({ division: 'h3', colors: ['#ce1126', '#ffffff', '#0038a8'] });
+
+const open = (design: Simple | FlagData): string => ('division' in design && typeof design.division === 'string' ? `/#s=${encodeSimple(design as Simple)}` : `/#f=${encodeFlag(design as FlagData)}`);
+const draw = (design: Simple | FlagData): FlagData => (typeof design.division === 'string' ? fromSimple(design as Simple) : (design as FlagData));
+
+const principles = [
+  {
+    id: 'simple',
+    title: '1. Keep it simple',
+    text: [
+      'A flag is seen from far away, moving, often from behind, and usually for a second or two. Whatever survives that is the flag; the rest is lost. The usual test: could a child draw it from memory?',
+      'Simple does not mean empty. It means one idea, drawn large. If your flag needs three symbols, ask which one the other two could do without.',
+    ],
+    good: { design: simpleGood, caption: 'One field, one charge. Recognisable the size of a postage stamp.' },
+    bad: { design: busy, caption: 'Seven layers. Each makes sense; together they are a blur from across the street.' },
+  },
+  {
+    id: 'meaning',
+    title: '2. Mean something',
+    text: [
+      'Colours, shapes and their arrangement should stand for something the people under the flag would recognise: a sea, a mountain, a founding story, a virtue they like to claim. The meaning need not be obvious to outsiders, but it has to be there.',
+      'For worldbuilders this is the pleasant part. Write the meaning down as you go: “blue for the two rivers, the star for the capital”. A flag with a story is one your readers or players will remember, and a wiki article with a symbolism section reads as real.',
+    ],
+    good: { design: meaning, caption: 'Sky over green land, and the mountain the country is named for.' },
+  },
+  {
+    id: 'colours',
+    title: '3. Use two or three basic colours',
+    text: [
+      'Most lasting flags draw from a short list: red, blue, green, black, yellow and white. Two or three of them, well apart in lightness, are enough.',
+      'Heraldry has had a rule for this for eight centuries, the rule of tincture: put a light colour (white or yellow, the “metals”) on a dark one, or a dark one on a light one, and never dark on dark or light on light. Flagwright’s design check measures exactly this contrast, layer by layer.',
+    ],
+    good: { design: colorsGood, caption: 'Two colours, as far apart as colours get.' },
+    bad: { design: colorsBad, caption: 'Four dark colours. The bands merge and the star disappears.' },
+  },
+  {
+    id: 'seals',
+    title: '4. No lettering or seals',
+    text: [
+      'Writing can’t be read on cloth that is moving, and reads backwards on the other side. A seal was designed to be looked at on paper, at arm’s length; on a flag it becomes a pale smudge on a blue sheet, which is why so many of those flags are hard to tell apart.',
+      'If your country has a coat of arms, take one element from it, the lion or the tower or the tree, and let it fill the flag. Flagwright has no text tool, on purpose.',
+    ],
+    good: { design: sealGood, caption: 'One element from the arms, large.' },
+    bad: { design: seal, caption: 'The whole seal, small. A “seal on a bedsheet”, as flag people call it.' },
+  },
+  {
+    id: 'distinctive',
+    title: '5. Be distinctive, or be related',
+    text: [
+      'A flag has to be told apart from the others at a glance. With plain tricolours that is harder than it looks: most combinations of red, white, blue, green and yellow are taken, and the design check will tell you when yours is.',
+      'The exception is family. Nordic crosses, Pan-African colours, Pan-Arab colours and Pan-Slavic colours look alike on purpose, to show kinship. In a shared world this is a gift: give neighbouring or related nations a common layout or palette, and their history shows on the map before anyone reads a word.',
+    ],
+    good: { design: distinct, caption: 'An unusual division and palette: no one will mistake it.' },
+    bad: { design: twin, caption: 'A fine flag. The Netherlands has flown it since the seventeenth century.' },
+  },
+];
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'How to design a good flag: five principles, with examples',
+    description: 'The five principles of good flag design explained for worldbuilders, each with a flag that follows it and one that does not.',
+    url: `${site.url}/guide/`,
+    image: `${site.url}/og.png`,
+    inLanguage: 'en',
+    author: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
+    publisher: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
+    datePublished: '2026-11-12',
+    dateModified: '2026-11-12',
+  },
+];
+---
+
+<Base
+  title="How to design a good flag: five principles, with examples"
+  description="The five principles of good flag design, explained for worldbuilders: keep it simple, mean something, two or three colours, no lettering or seals, be distinctive. Each with a good and a bad example you can open in the flag maker."
+  crumb="Design guide"
+  jsonld={jsonld}
+>
+  <div class="page">
+    <p class="crumbs"><a href="/">Flag maker</a> › Design guide</p>
+    <article class="prose">
+      <h1>How to design a good flag</h1>
+      <p class="lede">
+        Five principles, each with a flag that follows it and one that doesn’t. They are a summary of what works, not a law:
+        every example opens in the maker, so you can break the rule yourself and see.
+      </p>
+      <p>
+        The principles come from vexillology, the study of flags. Ted Kaye set them out in
+        <a href={ref('https://nava.org/good-flag-bad-flag')} target="_blank" rel="noopener"><cite>Good Flag, Bad Flag</cite></a>
+        for the North American Vexillological Association in 2006, drawing on what flag designers had said for a century.
+        They explain why some flags are loved and flown everywhere, and others hang unnoticed outside one office.
+      </p>
+
+      {
+        principles.map((p) => (
+          <section id={p.id}>
+            <h2>{p.title}</h2>
+            {p.text.map((t) => <p>{t}</p>)}
+            <div class="examples">
+              <figure class="good">
+                <a href={open(p.good.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.good.design)} id={`${p.id}-good`} title="A flag that follows the principle" /></a>
+                <figcaption><strong>Does.</strong> {p.good.caption}</figcaption>
+              </figure>
+              {p.bad && (
+                <figure class="bad">
+                  <a href={open(p.bad.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.bad.design)} id={`${p.id}-bad`} title="A flag that breaks the principle" /></a>
+                  <figcaption><strong>Doesn’t.</strong> {p.bad.caption}</figcaption>
+                </figure>
+              )}
+            </div>
+          </section>
+        ))
+      }
+
+      <h2 id="breaking">When to break the rules</h2>
+      <p>
+        Often, if you know why. <a href={wikipedia('Flag of Maryland')} target="_blank" rel="noopener">Maryland’s flag</a> is
+        two clashing coats of arms quartered and is adored. <a href={wikipedia('Flag of South Africa')} target="_blank" rel="noopener">South Africa’s</a>
+        has six colours and works because one bold shape holds them. <a href={wikipedia('Flag of Wales')} target="_blank" rel="noopener">Wales</a> put a
+        detailed dragon on its flag and nobody has ever confused it with anything. Complexity that is the whole point can succeed;
+        complexity that crept in by committee rarely does.
+      </p>
+      <p>
+        In a fictional world, a bad flag can be good writing. A bureaucratic empire should have a seal on a bedsheet. A nation
+        founded last year by three rival factions might well fly three symbols. Let the flag say what the country is like.
+      </p>
+
+      <h2 id="worldbuilding">Five more tips for worldbuilders</h2>
+      <ul>
+        <li><strong>Design the family first.</strong> Decide what neighbours share (a cross, a palette, a star) before drawing each flag.</li>
+        <li><strong>Give flags a history.</strong> Real flags change with regimes. An older version with one detail different is an afternoon’s work and a paragraph of lore.</li>
+        <li><strong>Mind what could be made.</strong> A medieval kingdom dyes with madder, woad and weld: reds, blues, yellows. Purple is for emperors.</li>
+        <li><strong>Check it small.</strong> On a map or in an infobox your flag is 30 pixels wide. The design check shows it at that size.</li>
+        <li><strong>Pick proportions on purpose.</strong> 2:3 is neutral, 1:2 feels naval and British, square feels Swiss or military.</li>
+      </ul>
+
+      <p><a class="btn btn-primary cta" href="/">Make your flag</a></p>
+      <p>
+        New to the vocabulary? The <a href="/glossary/">glossary</a> explains hoist, fly, canton, saltire and the rest. Short on
+        ideas? Start from a <a href="/templates/">template</a>.
+      </p>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-4) 0;
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  figcaption {
+    margin-top: var(--space-2);
+    color: var(--ink-muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .good strong {
+    color: var(--good);
+  }
+
+  .bad strong {
+    color: var(--danger);
+  }
+</style>

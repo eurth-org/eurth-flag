@@ -1,0 +1,5 @@
+# Flagwright, flag.eurth.org: everything here is meant to be found.
+User-agent: *
+Allow: /
+
+Sitemap: https://flag.eurth.org/sitemap-index.xml

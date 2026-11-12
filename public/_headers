@@ -1,0 +1,19 @@
+# Security headers for every page. The Content-Security-Policy lets only Flagwright's own files
+# run, plus the few small scripts Astro writes into each page (the theme before first paint, and
+# the loader for the tool), allowed by their hashes: tools/postbuild.mjs works the hashes out
+# from the built pages and puts them in place of the placeholder below (tests/headers.test.ts
+# checks the result). Styles may be inline: the stylesheet is inside each page. Embedding is allowed on
+# eurth.org. No upgrade-insecure-requests: Cloudflare redirects to HTTPS, and the directive
+# breaks local testing over http.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' __SCRIPT_HASHES__; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://eurth.org https://*.eurth.org
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/sw.js
+  Cache-Control: no-cache

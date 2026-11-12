@@ -1,0 +1,14 @@
+// A static site (dist/): no Worker code, only files.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "eurth-flag",
+  // The Cloudflare account that holds the eurth.org zone. Not a secret.
+  "account_id": "0954ead81ed9fd06d343580d95902280",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [{ "pattern": "flag.eurth.org", "custom_domain": true }]
+}

@@ -1,0 +1,18 @@
+---
+// A flag drawn at build time, as inline SVG. Each one on a page needs its own id.
+import type { Flag } from '../flag/model';
+import { describeFlag } from '../flag/describe';
+import { flagSvg } from '../flag/render';
+
+interface Props {
+  flag: Flag;
+  id: string;
+  /** What the picture is called; its description is written from the design. */
+  title?: string;
+  class?: string;
+}
+const { flag, id, title, class: cls } = Astro.props;
+const svg = flagSvg(flag, { clipId: `clip-${id}`, fluid: true, title: title ? `${title}: ${describeFlag(flag)}` : undefined });
+---
+
+<span class:list={['flag', cls]} style={`aspect-ratio:${flag.ratio[1]}/${flag.ratio[0]}`} set:html={svg} />

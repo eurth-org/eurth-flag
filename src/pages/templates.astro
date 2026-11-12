@@ -1,0 +1,96 @@
+---
+// The classic flag layouts, each drawn at build time and opening in the maker with one click.
+import Flag from '../components/Flag.astro';
+import { describeFlag } from '../flag/describe';
+import { encodeSimple } from '../flag/link';
+import { fromSimple } from '../flag/simple';
+import { templates } from '../flag/templates';
+import Base from '../layouts/Base.astro';
+import { site } from '../lib/site';
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Flag templates',
+    url: `${site.url}/templates/`,
+    description: 'Classic flag layouts to start from, free to change.',
+    hasPart: templates.map((t) => ({ '@type': 'CreativeWork', name: t.name, description: t.about })),
+  },
+];
+---
+
+<Base
+  title={`Flag templates: ${templates.length} classic layouts to start from`}
+  description="Free flag templates: tricolour, Nordic cross, saltire, canton, hoist triangle, pall and more. Open any of them in the flag maker, change the colours and symbols, and download it as SVG or PNG."
+  crumb="Templates"
+  jsonld={jsonld}
+>
+  <div class="page">
+    <p class="crumbs"><a href="/">Flag maker</a> › Templates</p>
+    <div class="prose">
+      <h1>Flag templates: the classic layouts</h1>
+      <p class="lede">
+        Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what
+        you have in mind and make it yours.
+      </p>
+    </div>
+    <ul class="gallery">
+      {
+        templates.map((t) => {
+          const flag = fromSimple(t.simple);
+          return (
+            <li id={t.id}>
+              <a href={`/#s=${encodeSimple(t.simple)}`} aria-label={`Open the ${t.name.toLowerCase()} template in the flag maker`}>
+                <Flag flag={flag} id={`tpl-${t.id}`} title={t.name} />
+              </a>
+              <h2>{t.name}</h2>
+              <p>{t.about}</p>
+              <p class="blazon">{describeFlag(flag)}</p>
+              <p><a href={`/#s=${encodeSimple(t.simple)}`}>Open in the maker</a></p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-6) var(--space-4);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gallery a {
+    display: block;
+  }
+
+  .gallery h2 {
+    margin: var(--space-3) 0 var(--space-1);
+    font-size: 17px;
+  }
+
+  .gallery p {
+    margin: 0 0 var(--space-1);
+  }
+
+  .blazon {
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gallery a :global(.flag) {
+      transition: transform 0.2s;
+    }
+
+    .gallery a:hover :global(.flag) {
+      transform: translateY(-2px) rotate(-1deg);
+    }
+  }
+</style>

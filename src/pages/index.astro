@@ -1,0 +1,241 @@
+---
+// The maker, and under it what search engines and newcomers both want: what it is, how to use
+// it, and answers to the usual questions (also given to search engines as structured data).
+import { faBookAtlas, faSwatchbook, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import Fa from '../components/Fa.astro';
+import Flag from '../components/Flag.astro';
+import { emblems } from '../flag/emblems';
+import { encodeSimple } from '../flag/link';
+import { fromSimple } from '../flag/simple';
+import { templates } from '../flag/templates';
+import Base from '../layouts/Base.astro';
+import { site } from '../lib/site';
+import Maker from '../ui/Maker.svelte';
+
+const steps = [
+  { name: 'Divide the field', text: 'Pick a layout: a plain field, two or three bands, stripes, quarters, a diagonal, rays. Then choose its colours from the flag palette, or any colour you like.' },
+  { name: 'Add an overlay', text: 'Lay one bold shape over the field: a cross, a Nordic cross, a saltire, a canton, a hoist triangle, a border, a pall. Or leave the field as it is.' },
+  { name: 'Choose a symbol', text: `Add a star, a sun, a crescent, a ring of stars, or one of ${emblems.length} emblems, from dragons and wheat to towers and anchors. Set its colour, place and size.` },
+  { name: 'Check it and take it with you', text: 'The design check reads your flag the way a vexillologist would. Download it as SVG, PNG or WebP, or copy the link: the link is the flag.' },
+];
+
+const faq = [
+  {
+    q: 'Is Flagwright free?',
+    a: 'Yes. There is no account, no watermark and no paid tier. It is open source, made by the Eurth worldbuilding community for anyone who needs a flag.',
+  },
+  {
+    q: 'Who owns the flags I make?',
+    a: 'You do. Flagwright keeps no copy and claims no rights. Use your flag in a wiki, a novel, a game, a tabletop campaign or on real cloth. Emblems from the library come from Font Awesome Free under CC BY 4.0, which asks for a credit; stars, suns, crescents and every plain shape carry no conditions at all.',
+  },
+  {
+    q: 'What is the difference between simple and advanced mode?',
+    a: 'Simple mode is four choices: a division, an overlay, a symbol and their colours. It is the quickest way to a good flag. Advanced mode opens the same flag layer by layer: any number of bands with their own widths, any number of shapes and emblems, each placed, sized and turned by hand or by number. Advanced starts from your simple design, so you can begin simple and refine.',
+  },
+  {
+    q: 'Which formats can I download?',
+    a: 'SVG, which stays sharp at any size and is what wikis such as IIWiki and Wikipedia prefer; and PNG or WebP at up to 3840 pixels wide. You can also copy the picture, or copy a link that holds the whole design.',
+  },
+  {
+    q: 'Can I use it for NationStates, IIWiki, D&D or my novel?',
+    a: 'That is what it was made for. Flagwright comes from Eurth, a worldbuilding and roleplay community that began on NationStates in 2004. The SVG uploads straight to a wiki; the PNG suits a forum, a NationStates nation page or a campaign handout.',
+  },
+  {
+    q: 'What makes a flag good?',
+    a: 'Most flag people agree on five things: keep it simple, make it mean something, use two or three colours that contrast, leave out lettering and seals, and make it distinctive. The design check measures the parts that can be measured and tells you where your flag bends a rule. The guide explains each one with examples.',
+  },
+  {
+    q: 'Which proportions should my flag have?',
+    a: '2:3 (two high, three wide) is the most common and a safe choice. 1:2 is longer, in the British manner; 3:5 sits between them; 1:1 is square, like Switzerland. In advanced mode you can set any proportions.',
+  },
+  {
+    q: 'Does it work offline, and on a phone?',
+    a: 'Yes to both. After the first visit the site keeps a copy of itself on your device and opens without a connection. Everything runs in your browser, on a phone as well as a desk.',
+  },
+  {
+    q: 'Do you keep my flags or track me?',
+    a: 'No. There are no trackers, cookies or analytics, and no server that stores designs. A flag lives in its link and, if you press Save, in your own browser.',
+  },
+];
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${site.url}/#app`,
+    name: 'Flagwright',
+    alternateName: ['Eurth flag maker', 'Flagwright flag designer'],
+    url: `${site.url}/`,
+    description: site.description,
+    applicationCategory: 'DesignApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript. Works in any current browser.',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    featureList: [
+      'Simple mode: division, overlay, symbol and colours',
+      'Advanced mode: unlimited bands and layers, placed by hand',
+      `${emblems.length} emblems, plus stars, suns, crescents and rings of stars`,
+      'Design check against the principles of good flag design',
+      'A written description of every flag',
+      'Download as SVG, PNG or WebP',
+      'Share a flag as a link',
+      'Works offline',
+    ],
+    image: `${site.url}/og.png`,
+    license: 'https://www.apache.org/licenses/LICENSE-2.0',
+    creator: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to make a flag online',
+    totalTime: 'PT2M',
+    step: steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+const picks = templates.slice(0, 6);
+---
+
+<Base title="Flagwright: free online flag maker for worldbuilders" jsonld={jsonld}>
+  <div class="hero">
+    <h1>Flag maker: design a flag for your country, city or cause</h1>
+    <p>
+      Four choices in <strong>Simple</strong> mode, every layer by hand in <strong>Advanced</strong>. Free, in your browser, no
+      account. Download as SVG or PNG.
+    </p>
+  </div>
+
+  <Maker client:load />
+
+  <div class="page">
+    <div class="prose">
+      <h2 id="how">How to make a flag</h2>
+      <ol class="steps">
+        {steps.map((s) => <li><strong>{s.name}.</strong> {s.text}</li>)}
+      </ol>
+      <p>
+        Want more control? Switch to <strong>Advanced</strong>: your simple flag opens as bands and layers you can move, resize,
+        turn, restack and recolour one by one. Drag a layer on the flag, or type exact numbers.
+      </p>
+    </div>
+
+    <h2 id="start" class="section">Start from a classic layout</h2>
+    <ul class="picks">
+      {
+        picks.map((t) => (
+          <li>
+            <a href={`/#s=${encodeSimple(t.simple)}`}>
+              <Flag flag={fromSimple(t.simple)} id={`pick-${t.id}`} title={t.name} />
+              <span>{t.name}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="links">
+      <a class="btn" href="/templates/"><Fa icon={faSwatchbook} /> All {templates.length} templates</a>
+      <a class="btn" href="/guide/"><Fa icon={faWandMagicSparkles} /> How to design a good flag</a>
+      <a class="btn" href="/glossary/"><Fa icon={faBookAtlas} /> Flag terms explained</a>
+    </p>
+
+    <div class="prose">
+      <h2 id="questions">Questions</h2>
+      {
+        faq.map((f) => (
+          <details class="faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .hero p {
+    max-width: 760px;
+    margin: var(--space-1) 0 0;
+    color: var(--ink-muted);
+  }
+
+  .section {
+    margin: var(--space-8) 0 var(--space-3);
+    font-size: 21px;
+  }
+
+  .steps {
+    padding-left: 1.3em;
+  }
+
+  .steps li {
+    margin-bottom: var(--space-2);
+  }
+
+  .picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .picks a {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .picks a:hover span:last-child {
+    color: var(--accent-text);
+    text-decoration: underline;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+  }
+
+  .links .btn {
+    text-decoration: none;
+  }
+
+  .faq {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .faq summary {
+    padding: var(--space-3) 0;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .faq p {
+    margin: 0 0 var(--space-3);
+  }
+</style>

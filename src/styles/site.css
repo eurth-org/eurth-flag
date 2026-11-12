@@ -1,0 +1,445 @@
+/* The page around the tool: bars, header, thanks and the written pages. As on gov.eurth.org. */
+
+/* Top bar and header, as on eurth.org. The bar is Eurth blue; its links are white pills with
+   Eurth blue text, so the bar stays two colours (a brand exception in tests/contrast.test.ts). */
+.topbar {
+  position: relative;
+  z-index: 4;
+  background: var(--eurth-blue);
+  padding: 0 var(--space-4);
+}
+
+/* On wide screens, the bars' contents line up with the page below instead of the screen's edges. */
+.bar {
+  max-width: calc(1200px - 2 * var(--space-4));
+  margin: 0 auto;
+}
+
+.topbar .bar {
+  min-height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.topbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 6px 0;
+  /* Room for the theme switch, which arrives with the script. */
+  min-height: 39px;
+}
+
+.topbar a,
+.bottombar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--eurth-blue);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.topbar a:hover,
+.bottombar a:hover {
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+  transform: translateY(-1px);
+}
+
+/* The page you are on: the pill turns over, white on a deeper blue. */
+.topbar a[aria-current='page'] {
+  background: var(--night);
+  color: #ffffff;
+}
+
+.topbar a:focus-visible,
+.bottombar a:focus-visible,
+.topbar .switch:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* The light and dark switch, as a white pill in the blue bar. */
+.topbar nav .switch {
+  width: 34px;
+  height: 27px;
+  border: 0;
+  background: #ffffff;
+  color: var(--eurth-blue);
+}
+
+.topbar nav .switch svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (max-width: 560px) {
+  .topbar nav {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .topbar a {
+    padding: 5px 9px;
+  }
+
+  .nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .topbar a[aria-current='page'] .nav-label {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar a,
+  .bottombar a {
+    transition: none;
+  }
+
+  .topbar a:hover,
+  .bottombar a:hover {
+    transform: none;
+  }
+}
+
+.header {
+  position: relative;
+  z-index: 3;
+  background: var(--header);
+  padding: var(--space-2) var(--space-4);
+}
+
+.header .bar {
+  min-height: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.brand,
+.home {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.home {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-control);
+}
+
+/* The name as eurth.org writes its own: heavy capitals in Eurth blue (large text, 3:1 is enough). */
+.title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.title .home {
+  color: var(--eurth-blue);
+}
+
+.logo {
+  display: inline-flex;
+}
+
+.logo svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+  transform-origin: 16% 90%;
+}
+
+/* The flag in the logo catches the wind when pointed at. */
+@media (prefers-reduced-motion: no-preference) {
+  .home:hover .logo svg,
+  .home:focus-visible .logo svg {
+    animation: flutter 0.9s ease-in-out;
+  }
+}
+
+@keyframes flutter {
+  20% {
+    transform: rotate(-9deg);
+  }
+  45% {
+    transform: rotate(6deg);
+  }
+  70% {
+    transform: rotate(-3deg);
+  }
+}
+
+.tagline {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+}
+
+@media (max-width: 480px) {
+  .tagline {
+    display: none;
+  }
+}
+
+.icon {
+  flex: none;
+  vertical-align: -0.125em;
+}
+
+/* Panels, as in the tool. */
+.panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: var(--space-4);
+}
+
+/* A flag picture: a thin edge, so white flags show on white pages. */
+.flag {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  line-height: 0;
+}
+
+.flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Written pages: one readable column. */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.prose {
+  max-width: 760px;
+}
+
+.prose h1,
+.page > h1 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 30px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.prose h2 {
+  margin: var(--space-8) 0 var(--space-2);
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.prose h3 {
+  margin: var(--space-6) 0 var(--space-1);
+  font-size: 16px;
+}
+
+.prose p,
+.prose li {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.prose p {
+  margin: 0 0 var(--space-3);
+}
+
+.lede {
+  color: var(--ink-muted);
+  font-size: 18px !important;
+}
+
+.crumbs {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* A call to the tool. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+/* Footer */
+.thanks {
+  max-width: 1200px;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.thanks h2 {
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.about {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 760px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.about p {
+  margin: 0;
+}
+
+.about-icon {
+  display: inline-flex;
+  justify-content: center;
+  padding-top: 2px;
+  color: var(--ink-muted);
+  font-size: 16px;
+}
+
+.about-icon > svg:not(.icon) {
+  width: 18px;
+  height: 18px;
+}
+
+.heart {
+  color: #bf1e2e;
+}
+
+:root[data-theme='dark'] .heart {
+  color: #f07c63;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .about li:hover .heart .icon {
+    animation: beat 0.9s ease-in-out;
+  }
+}
+
+@keyframes beat {
+  15%,
+  45% {
+    transform: scale(1.3);
+  }
+  30% {
+    transform: scale(1.05);
+  }
+}
+
+/* The bottom bar: Eurth blue, with white pills, as at the top. */
+.bottombar {
+  background: var(--eurth-blue);
+  padding: 0 var(--space-4);
+}
+
+.bottombar .bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+/* Pointed at, each icon draws its own outline and then fills in, as line-md's icons do. */
+.bottombar a .icon path {
+  stroke: currentColor;
+  stroke-width: 0;
+  stroke-linejoin: round;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bottombar a:hover .icon path,
+  .bottombar a:focus-visible .icon path {
+    animation: draw 1s ease-out;
+  }
+}
+
+@keyframes draw {
+  0% {
+    fill-opacity: 0;
+    stroke-width: 28;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  65% {
+    fill-opacity: 0;
+    stroke-width: 28;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    fill-opacity: 1;
+    stroke-width: 0;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* For keyboard users: a way past the header, shown when it has focus (WCAG 2.4.1). */
+.skip {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 30;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.skip:focus {
+  top: var(--space-2);
+}

@@ -1,0 +1,257 @@
+---
+// The words flags are described in, each in a sentence, with a picture where one helps.
+import Flag from '../components/Flag.astro';
+import { encodeSimple } from '../flag/link';
+import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
+import Base from '../layouts/Base.astro';
+import { site } from '../lib/site';
+
+const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', colors: ['#0a1f5c', '#ffffff', '#ce1126'], ...changes });
+
+interface Term {
+  term: string;
+  also?: string;
+  text: string;
+  show?: Simple;
+}
+
+const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
+  {
+    title: 'Parts of a flag',
+    id: 'parts',
+    intro: 'A flag is described as it flies from a pole on its left.',
+    terms: [
+      { term: 'Field', text: 'The background of a flag: the whole cloth, before anything is put on it. Also called the ground.' },
+      { term: 'Hoist', text: 'The half of the flag nearest the pole, and the edge along it. Symbols often sit here because the hoist stays visible when there is no wind.' },
+      { term: 'Fly', text: 'The half furthest from the pole: the part that flaps, frays and is replaced first.' },
+      { term: 'Canton', text: 'The upper hoist quarter of a flag, and a rectangle placed there. The place of honour, and the one part that shows on a limp flag.', show: s({ division: 'h7', colors: ['#ce1126', '#ffffff', '#ce1126'], overlay: 'canton', overlayColor: '#0a1f5c' }) },
+      { term: 'Charge', text: 'Any figure placed on the field: a star, a cross, an animal. A field with a charge on it is said to be “charged” with it.', show: s({ division: 'solid', symbol: 'star5', symbolColor: '#fcd116', scale: 'l' }) },
+      { term: 'Emblem', text: 'A charge that is a picture of something: a crown, an eagle, a tree. More detailed than a plain shape, so best used large and alone.' },
+      { term: 'Proportions', also: 'ratio', text: 'A flag’s height against its width, written height first: 2:3 is two units high and three wide. 2:3 and 1:2 are the most common.' },
+      { term: 'Obverse and reverse', text: 'The front of a flag, seen with the hoist on the left, and its back. Most flags are a mirror image on the back, which is one reason lettering fails.' },
+    ],
+  },
+  {
+    title: 'Dividing the field',
+    id: 'divisions',
+    intro: 'How a field is split into areas of colour.',
+    terms: [
+      { term: 'Bicolour', text: 'A field of two bands, side by side or one above the other.', show: s({ division: 'h2', colors: ['#ffffff', '#ce1126', '#ffffff'] }) },
+      { term: 'Tricolour', text: 'A field of three bands in three colours. Strictly, three different colours: France’s is a tricolour, Austria’s is not.', show: s({ division: 'v3', colors: ['#009739', '#ffffff', '#ff7900'] }) },
+      { term: 'Triband', text: 'A field of three bands in two colours, the outer two alike.', show: s({ division: 'h-triband', colors: ['#ce1126', '#ffffff', '#ce1126'] }) },
+      { term: 'Spanish fess', text: 'A horizontal triband whose middle band is twice as wide as the others, leaving room for a charge. Named after Spain’s flag.', show: s({ division: 'h-fess', colors: ['#ce1126', '#fcd116', '#ce1126'] }) },
+      { term: 'Canadian pale', text: 'A vertical triband whose middle band is half the flag’s width: a square, on Canada’s 1:2 flag, which gave it its name.', show: s({ division: 'v-pale', colors: ['#ce1126', '#ffffff', '#ce1126'] }) },
+      { term: 'Quartered', text: 'Divided into four by one vertical and one horizontal line, usually in two colours set diagonally.', show: s({ division: 'quarters', colors: ['#0038a8', '#ffffff', '#ffffff'] }) },
+      { term: 'Per bend', text: 'Divided diagonally from the upper hoist to the lower fly. From the lower hoist to the upper fly it is per bend sinister.', show: s({ division: 'bend-down', colors: ['#fcd116', '#009739', '#ffffff'] }) },
+      { term: 'Per saltire', text: 'Divided by both diagonals into four triangles.', show: s({ division: 'saltire', colors: ['#009739', '#000000', '#ffffff'] }) },
+      { term: 'Gyronny', text: 'Divided into wedges that meet in the centre, like the slices of a pie; a gyronny of eight has eight.', show: s({ division: 'gyronny8', colors: ['#fcd116', '#000000', '#ffffff'] }) },
+      { term: 'Chequy', also: 'chequered', text: 'Divided into squares of two colours by turns, like a chessboard.', show: s({ division: 'chequy', colors: ['#ce1126', '#ffffff', '#ffffff'] }) },
+    ],
+  },
+  {
+    title: 'Ordinaries: the bold shapes',
+    id: 'ordinaries',
+    intro: 'The simple geometric figures that heraldry and flags share.',
+    terms: [
+      { term: 'Cross', text: 'A vertical and a horizontal bar meeting in the centre and reaching the edges.', show: s({ division: 'solid', colors: ['#ffffff', '#ffffff', '#ffffff'], overlay: 'cross', overlayColor: '#ce1126' }) },
+      { term: 'Nordic cross', also: 'Scandinavian cross', text: 'A cross whose upright is set towards the hoist. First flown by Denmark; now the family mark of the Nordic countries.', show: s({ division: 'solid', colors: ['#0038a8', '#ffffff', '#ffffff'], overlay: 'nordic', overlayColor: '#fcd116' }) },
+      { term: 'Saltire', text: 'A diagonal cross, from corner to corner. Also called a St Andrew’s cross.', show: s({ division: 'solid', colors: ['#0038a8', '#ffffff', '#ffffff'], overlay: 'saltire', overlayColor: '#ffffff' }) },
+      { term: 'Fess', text: 'A horizontal band across the middle of the field.', show: s({ division: 'solid', colors: ['#009739', '#ffffff', '#ffffff'], overlay: 'fess', overlayColor: '#ffffff' }) },
+      { term: 'Pale', text: 'A vertical band down the middle of the field.', show: s({ division: 'solid', colors: ['#ce1126', '#ffffff', '#ffffff'], overlay: 'pale', overlayColor: '#ffffff' }) },
+      { term: 'Bend', text: 'A diagonal band from the upper hoist to the lower fly; the other way, a bend sinister.', show: s({ division: 'solid', colors: ['#009739', '#ffffff', '#ffffff'], overlay: 'bend', overlayColor: '#fcd116' }) },
+      { term: 'Pall', text: 'A Y-shape, usually on its side with the fork at the hoist.', show: s({ division: 'h2', colors: ['#ce1126', '#0038a8', '#ffffff'], overlay: 'pall', overlayColor: '#ffffff' }) },
+      { term: 'Pile', also: 'hoist triangle', text: 'A triangle with its base along one edge. On flags it is nearly always based on the hoist, pointing into the fly.', show: s({ division: 'h2', colors: ['#ffffff', '#ce1126', '#ffffff'], overlay: 'pile', overlayColor: '#0a1f5c' }) },
+      { term: 'Border', also: 'bordure', text: 'A band of colour around the edge of the field.', show: s({ division: 'solid', colors: ['#ce1126', '#ffffff', '#ffffff'], overlay: 'border', overlayColor: '#009739' }) },
+      { term: 'Lozenge', text: 'A diamond shape standing on one point.', show: s({ division: 'solid', colors: ['#009739', '#ffffff', '#ffffff'], overlay: 'lozenge', overlayColor: '#fcd116' }) },
+      { term: 'Disc', also: 'roundel', text: 'A filled circle.', show: s({ division: 'solid', colors: ['#ffffff', '#ffffff', '#ffffff'], symbol: 'disc', symbolColor: '#ce1126', scale: 'l' }) },
+    ],
+  },
+  {
+    title: 'Colour and craft',
+    id: 'craft',
+    intro: 'The ideas behind choosing and combining.',
+    terms: [
+      { term: 'Vexillology', text: 'The study of flags: their history, meaning and design. From the Latin vexillum, a Roman cavalry banner. Someone who studies flags is a vexillologist; someone who designs them, a vexillographer.' },
+      { term: 'Rule of tincture', text: 'Heraldry’s rule of contrast: a light colour (white or yellow, the “metals”) goes on a dark one, or a dark on a light, and never dark on dark or light on light. It is why most flags can be read at a distance.' },
+      { term: 'Fimbriation', text: 'A narrow edge of a contrasting colour, usually white or yellow, that separates two colours which would otherwise blur together. In advanced mode, lay a slightly thicker copy of a shape beneath it.' },
+      { term: 'Counterchanged', text: 'A charge that lies across a division and swaps the colours on each side of it: light where the field is dark, dark where it is light.' },
+      { term: 'Defaced', text: 'A flag with a charge added to an existing design, as a state flag adds arms to the national tricolour. Not an insult: only the technical term.' },
+      { term: 'Civil flag, state flag, ensign', text: 'Many countries have several flags: a plain one anyone may fly (civil), one with arms for the government (state), and versions for ships (ensigns). A rich source of lore for a fictional nation.' },
+      { term: 'Pan-colours', text: 'Sets of colours shared by related nations: Pan-Slavic (white, blue, red), Pan-African (red, yellow, green, sometimes black), Pan-Arab (red, white, green, black). A shared world can have its own.' },
+    ],
+  },
+];
+
+const all = groups.flatMap((g) => g.terms);
+const anchor = (term: string) => term.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    '@id': `${site.url}/glossary/`,
+    name: 'Glossary of flag terms',
+    description: 'The vocabulary of vexillology, in plain English.',
+    hasDefinedTerm: all.map((t) => ({
+      '@type': 'DefinedTerm',
+      name: t.term,
+      ...(t.also ? { alternateName: t.also } : {}),
+      description: t.text,
+      url: `${site.url}/glossary/#${anchor(t.term)}`,
+    })),
+  },
+];
+---
+
+<Base
+  title={`Flag terms explained: a glossary of ${all.length} vexillology words`}
+  description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of vexillology for worldbuilders."
+  crumb="Glossary"
+  jsonld={jsonld}
+>
+  <div class="page">
+    <p class="crumbs"><a href="/">Flag maker</a> › Glossary</p>
+    <div class="prose">
+      <h1>Flag terms explained</h1>
+      <p class="lede">
+        Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean,
+        in plain English. Every picture opens in the maker.
+      </p>
+
+      <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
+      <figure class="anatomy">
+        <svg viewBox="0 0 640 360" role="img" aria-label="The parts of a flag: the hoist is the half nearest the pole, the fly the half furthest from it, the canton the upper quarter at the hoist; the field is the background and a charge is a figure placed on it.">
+          <rect x="24" y="10" width="10" height="340" rx="5" fill="#f4900c"></rect>
+          <circle cx="29" cy="12" r="9" fill="#ffcc4d"></circle>
+          <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
+          <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
+          <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
+          <path d="M319 30V320" stroke="#fff" stroke-width="2" stroke-dasharray="6 6"></path>
+          <g font-family="system-ui, Arial, sans-serif" font-weight="700" font-size="20" fill="#fff" text-anchor="middle">
+            <text x="176" y="108">Canton</text>
+            <text x="176" y="262">Hoist</text>
+            <text x="462" y="290">Fly</text>
+            <text x="462" y="100">Charge</text>
+            <text x="560" y="58" font-size="16">Field</text>
+          </g>
+        </svg>
+        <figcaption>The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.</figcaption>
+      </figure>
+
+      <nav class="jump" aria-label="Sections">
+        {groups.map((g) => <a href={`#${g.id}`}>{g.title}</a>)}
+      </nav>
+    </div>
+
+    {
+      groups.map((g) => (
+        <section id={g.id}>
+          <div class="prose">
+            <h2>{g.title}</h2>
+            <p>{g.intro}</p>
+          </div>
+          <dl class="terms">
+            {g.terms.map((t) => (
+              <div class="term" id={anchor(t.term)}>
+                {t.show && (
+                  <a class="pic" href={`/#s=${encodeSimple(t.show)}`} aria-label={`Open this ${t.term.toLowerCase()} in the flag maker`}>
+                    <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
+                  </a>
+                )}
+                <div>
+                  <dt>
+                    {t.term}
+                    {t.also && <span class="also">or {t.also}</span>}
+                  </dt>
+                  <dd>{t.text}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))
+    }
+
+    <div class="prose">
+      <p><a class="btn btn-primary cta" href="/">Make your flag</a></p>
+      <p>Next: <a href="/guide/">how to design a good flag</a>, or start from a <a href="/templates/">template</a>.</p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .anatomy {
+    margin: var(--space-4) 0;
+  }
+
+  .anatomy svg {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+  }
+
+  .anatomy figcaption {
+    margin-top: var(--space-2);
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-weight: 600;
+  }
+
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-3) 0 0;
+  }
+
+  .term {
+    display: flex;
+    gap: var(--space-3);
+    align-items: start;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface-raised);
+    scroll-margin-top: var(--space-4);
+  }
+
+  .term:target {
+    border-color: var(--selected);
+    box-shadow: 0 0 0 1px var(--selected);
+  }
+
+  .pic {
+    flex: none;
+    width: 84px;
+    margin-top: 3px;
+  }
+
+  dt {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .also {
+    margin-left: 4px;
+    color: var(--ink-muted);
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 400px) {
+    .terms {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

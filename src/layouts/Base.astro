@@ -1,0 +1,237 @@
+---
+// Every page: the head (search and sharing tags, icons, the theme before first paint), the
+// Eurth-blue bar, the header, the thanks and the bottom bar. The look is Governmint's.
+import '../styles/app.css';
+import '../styles/site.css';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import {
+  faBookAtlas,
+  faCodeBranch,
+  faComments,
+  faCopyright,
+  faFlag,
+  faHeart,
+  faHeartPulse,
+  faLandmark,
+  faMap,
+  faNewspaper,
+  faScaleBalanced,
+  faSwatchbook,
+  faUserShield,
+  faWandMagicSparkles,
+} from '@fortawesome/free-solid-svg-icons';
+import logo from '../assets/logo.svg?raw';
+import yurt from '../assets/eurth-yurt-circle.svg?raw';
+import Fa from '../components/Fa.astro';
+import { ref, site } from '../lib/site';
+import ThemeSwitch from '../ui/ThemeSwitch.svelte';
+
+interface Props {
+  /** The page's own title; the site's name is added. */
+  title: string;
+  description?: string;
+  /** Structured data for search engines: one object per thing the page is about. */
+  jsonld?: object[];
+  noindex?: boolean;
+  /** Page names from the home page down, for the breadcrumb search engines show. */
+  crumb?: string;
+}
+const { title, description = site.description, jsonld = [], noindex = false, crumb } = Astro.props;
+const path = Astro.url.pathname;
+const canonical = new URL(path, site.url).href;
+const fullTitle = path === '/' ? title : `${title} · ${site.name}`;
+const ogAlt = 'Flagwright, flags made to fly, at flag.eurth.org: a row of flags in the classic layouts.';
+const nav = [
+  { href: '/', label: 'Maker', icon: faFlag },
+  { href: '/templates/', label: 'Templates', icon: faSwatchbook },
+  { href: '/guide/', label: 'Guide', icon: faWandMagicSparkles },
+  { href: '/glossary/', label: 'Glossary', icon: faBookAtlas },
+];
+const data: object[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${site.url}/#site`,
+    name: site.name,
+    alternateName: 'Eurth flag maker',
+    url: `${site.url}/`,
+    description: site.description,
+    inLanguage: 'en',
+    publisher: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
+  },
+  ...(crumb
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: site.name, item: `${site.url}/` },
+            { '@type': 'ListItem', position: 2, name: crumb, item: canonical },
+          ],
+        },
+      ]
+    : []),
+  ...jsonld,
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta id="theme-color" name="theme-color" content="#ffffff" />
+    <script is:inline>
+      // Light or dark before the page paints, so dark pages don't flash white (see ui/ThemeSwitch.svelte).
+      (function () {
+        var d = document.documentElement, t = null;
+        try { t = localStorage.getItem('flagwright:theme'); } catch (e) {}
+        var dark = t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        d.dataset.theme = dark ? 'dark' : 'light';
+        document.getElementById('theme-color').setAttribute('content', dark ? '#002b36' : '#ffffff');
+      })();
+    </script>
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <!-- Link previews (Reddit, Facebook, LinkedIn, X, Bluesky, Mastodon, Discord, Slack, WhatsApp,
+         iMessage): Open Graph, plus X's large card. tools/make-images.mjs makes og.png. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={`${site.name}, by Eurth`} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${site.url}/og.png`} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image:alt" content={ogAlt} />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {data.map((item) => <script type="application/ld+json" is:inline set:html={JSON.stringify(item)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to the content</a>
+
+    <div class="topbar">
+      <div class="bar">
+        <nav aria-label="Flagwright">
+          {
+            nav.map((item) => (
+              <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>
+                <Fa icon={item.icon} /> <span class="nav-label">{item.label}</span>
+              </a>
+            ))
+          }
+          <a href={ref(site.repo)} target="_blank" rel="noopener" aria-label="Flagwright on GitHub (opens in a new tab)">
+            <Fa icon={faGithub} /> <span class="nav-label">GitHub</span>
+          </a>
+          <ThemeSwitch client:only="svelte" />
+        </nav>
+      </div>
+    </div>
+
+    <header class="header">
+      <div class="bar">
+        <div class="brand">
+          <!-- Like any site's logo, this one goes home: a fresh flag. -->
+          <p class="title">
+            <a class="home" href="/" title="Flagwright: start afresh"><span class="logo" set:html={logo} />Flagwright</a>
+          </p>
+          <span class="tagline">{site.tagline}</span>
+          <span class="badge">Preview</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="thanks">
+      <h2>With thanks</h2>
+      <ul class="about">
+        <li>
+          <span class="about-icon" set:html={yurt} />
+          <p>
+            Made with love <span class="heart"><Fa icon={faHeart} /></span> by
+            <a href={ref('https://iiwiki.com/w/Orioni')} target="_blank" rel="noopener">Orioni</a> for
+            <a href={ref('https://eurth.org')} target="_blank" rel="noopener">Eurth, a Worldbuilding &amp; Roleplay Writing Community</a>,
+            and the people who live in it. Going strong since 2004. Made a flag you like? Give it a country:
+            <a href={ref('https://gov.eurth.org')} target="_blank" rel="noopener">Governmint</a> mints its government, and Eurth
+            has a world for it to live in.
+          </p>
+        </li>
+        <li>
+          <span class="about-icon"><Fa icon={faCodeBranch} /></span>
+          <p>
+            Inspired by two tools that taught a generation of worldbuilders to make flags:
+            <a href={ref('https://scrontch.eu/flags/')} target="_blank" rel="noopener">Scrontch’s Flag Designer</a> by Lars Ruoff
+            (2011) and <a href={ref('https://andrewsarnold.github.io/FlagMaker-Jr/')} target="_blank" rel="noopener">FlagMaker Jr.</a>
+            by Andrew Arnold. Icons and emblems by <a href={ref('https://fontawesome.com')} target="_blank" rel="noopener">Font Awesome</a>
+            (CC BY 4.0); sun and moon by <a href={ref('https://github.com/cyberalien/line-md')} target="_blank" rel="noopener">line-md</a> (MIT).
+          </p>
+        </li>
+        <li>
+          <span class="about-icon"><Fa icon={faLandmark} /></span>
+          <p>
+            The design check follows <a href="/guide/">five principles</a> flag people have argued over for decades, set out by
+            Ted Kaye in <cite>Good Flag, Bad Flag</cite> for the
+            <a href={ref('https://nava.org')} target="_blank" rel="noopener">North American Vexillological Association</a>. A guide,
+            not a law.
+          </p>
+        </li>
+        <li>
+          <span class="about-icon"><Fa icon={faCopyright} /></span>
+          <p>
+            © 2026 Eurth. Flagwright is open source under the
+            <a href={ref(`${site.repo}/blob/main/LICENSE`)} target="_blank" rel="noopener">Apache 2.0 licence</a>: use it, change it,
+            share it. The flags you make are yours: Flagwright keeps no copy and claims no rights to them. Emblems from the
+            library stay under Font Awesome’s CC BY 4.0, which asks for a credit.
+          </p>
+        </li>
+        <li>
+          <span class="about-icon"><Fa icon={faUserShield} /></span>
+          <p>
+            No Google Analytics, no trackers, no cookies, no account. A flag lives in its link and in your browser; what
+            Flagwright remembers (light or dark, your saved flags) stays on your device.
+          </p>
+        </li>
+        <li>
+          <span class="about-icon"><Fa icon={faScaleBalanced} /></span>
+          <p>
+            Flagwright is a worldbuilding tool, made for fiction and fun. Real flags are named as examples of a layout, not
+            as endorsements; flags that resemble real ones do so by the nature of stripes.
+          </p>
+        </li>
+      </ul>
+    </footer>
+
+    <!-- The rest of Eurth, in a bar like the one at the top. -->
+    <nav class="bottombar" aria-label="Eurth">
+      <div class="bar">
+        <a href={ref('https://eurth.org')} target="_blank" rel="noopener"><Fa icon={faComments} draw /> Forums</a>
+        <a href={ref('https://map.eurth.org')} target="_blank" rel="noopener"><Fa icon={faMap} draw /> Map</a>
+        <a href={ref('https://news.eurth.org')} target="_blank" rel="noopener"><Fa icon={faNewspaper} draw /> News</a>
+        <a href={ref('https://gov.eurth.org')} target="_blank" rel="noopener"><Fa icon={faLandmark} draw /> Governmint</a>
+        <a href={ref('https://status.eurth.org')} target="_blank" rel="noopener"><Fa icon={faHeartPulse} draw /> Status</a>
+      </div>
+    </nav>
+
+    <script>
+      import { clickDelights } from '../ui/fun';
+
+      clickDelights();
+      // Offline: a copy of the site kept on the device (src/offline/sw.js), in the built site only.
+      if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+        addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+      }
+    </script>
+  </body>
+</html>
