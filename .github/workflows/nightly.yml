@@ -1,0 +1,15 @@
+# Each night, just after midnight in Brussels: update @eurth/style and @eurth/profile within
+# version 1, rebuild, test, and deploy if anything changed (never before the door has opened).
+name: Nightly
+
+on:
+  schedule:
+    - cron: '10 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    permissions:
+      contents: write
+    uses: eurth-org/eurth-style/.github/workflows/tool-nightly.yml@v1
+    secrets: inherit

@@ -2,21 +2,23 @@
 // The maker, and under it what search engines and newcomers both want: what it is, how to use
 // it, and answers to the usual questions (also given to search engines as structured data).
 import { faBookAtlas, faSwatchbook, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
-import Fa from '../components/Fa.astro';
+import { faqPage, webApplication } from '@eurth/style/build';
+import Fa from '@eurth/style/components/Fa.astro';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
 import { emblems } from '../flag/emblems';
-import { encodeSimple } from '../flag/link';
+import { simpleLink } from '../flag/link';
 import { fromSimple } from '../flag/simple';
 import { templates } from '../flag/templates';
-import Base from '../layouts/Base.astro';
-import { site } from '../lib/site';
 import Maker from '../ui/Maker.svelte';
 
 const steps = [
   { name: 'Divide the field', text: 'Pick a layout: a plain field, two or three bands, stripes, quarters, a diagonal, rays. Then choose its colours from the flag palette, or any colour you like.' },
   { name: 'Add an overlay', text: 'Lay one bold shape over the field: a cross, a Nordic cross, a saltire, a canton, a hoist triangle, a border, a pall. Or leave the field as it is.' },
   { name: 'Choose a symbol', text: `Add a star, a sun, a crescent, a ring of stars, or one of ${emblems.length} emblems, from dragons and wheat to towers and anchors. Set its colour, place and size.` },
-  { name: 'Check it and take it with you', text: 'The design check reads your flag the way a vexillologist would. Download it as SVG, PNG or WebP, or copy the link: the link is the flag.' },
+  { name: 'Check it and take it with you', text: 'The design check reads your flag the way a vexillologist would. Download it as SVG, PNG or WebP, copy the link (the link is the flag), or save it in your nation’s profile file.' },
 ];
 
 const faq = [
@@ -34,7 +36,7 @@ const faq = [
   },
   {
     q: 'Which formats can I download?',
-    a: 'SVG, which stays sharp at any size and is what wikis such as IIWiki and Wikipedia prefer; and PNG or WebP at up to 3840 pixels wide. You can also copy the picture, or copy a link that holds the whole design.',
+    a: 'SVG, which stays sharp at any size and is what wikis such as IIWiki and Wikipedia prefer; and PNG or WebP at up to 3840 pixels wide, or in the sizes social sites like: link preview, square, portrait, story, pin and wide. You can also copy the picture, or copy a link that holds the whole design.',
   },
   {
     q: 'Can I use it for NationStates, IIWiki, D&D or my novel?',
@@ -49,102 +51,82 @@ const faq = [
     a: '2:3 (two high, three wide) is the most common and a safe choice. 1:2 is longer, in the British manner; 3:5 sits between them; 1:1 is square, like Switzerland. In advanced mode you can set any proportions.',
   },
   {
+    q: 'Where is my flag saved?',
+    a: 'In its link. The link holds the whole design, so copying the link is saving it: paste it into a forum post, a note or a bookmark. You can also download the picture, or save your nation as a profile file that the other Eurth tools can read. Flags once saved in the browser by an earlier version of Flagwright are no longer shown; their links still open them.',
+  },
+  {
+    q: 'What is the profile file?',
+    a: 'One small file, named after your nation and ending in .eurth.json, that carries a nation from one Eurth tool to the next. Flagwright writes the flag into it (its link, its description, the picture, its proportions and colours) and leaves everything else in the file exactly as it was. It is saved on your own device and sent nowhere.',
+  },
+  {
     q: 'Does it work offline, and on a phone?',
     a: 'Yes to both. After the first visit the site keeps a copy of itself on your device and opens without a connection. Everything runs in your browser, on a phone as well as a desk.',
   },
   {
     q: 'Do you keep my flags or track me?',
-    a: 'No. There are no trackers, cookies or analytics, and no server that stores designs. A flag lives in its link and, if you press Save, in your own browser.',
+    a: 'No. There are no trackers, cookies or analytics, and no server that stores designs. Nothing is kept in your browser either. A flag lives in its link; copying the link is saving it.',
   },
 ];
 
-const jsonld = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    '@id': `${site.url}/#app`,
-    name: 'Flagwright',
-    alternateName: ['Eurth flag maker', 'Flagwright flag designer'],
-    url: `${site.url}/`,
-    description: site.description,
-    applicationCategory: 'DesignApplication',
-    operatingSystem: 'Any',
-    browserRequirements: 'Requires JavaScript. Works in any current browser.',
-    isAccessibleForFree: true,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
-    featureList: [
-      'Simple mode: division, overlay, symbol and colours',
-      'Advanced mode: unlimited bands and layers, placed by hand',
-      `${emblems.length} emblems, plus stars, suns, crescents and rings of stars`,
-      'Design check against the principles of good flag design',
-      'A written description of every flag',
-      'Download as SVG, PNG or WebP',
-      'Share a flag as a link',
-      'Works offline',
-    ],
-    image: `${site.url}/og.png`,
-    license: 'https://www.apache.org/licenses/LICENSE-2.0',
-    creator: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: 'How to make a flag online',
-    totalTime: 'PT2M',
-    step: steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-  },
+const featureList = [
+  'Simple mode: division, overlay, symbol and colours',
+  'Advanced mode: unlimited bands and layers, placed by hand',
+  `${emblems.length} emblems, plus stars, suns, crescents and rings of stars`,
+  'Design check against the principles of good flag design',
+  'A written description of every flag',
+  'Download as SVG, PNG or WebP, in the sizes social sites use',
+  'A link that holds the whole flag',
+  'Nation profile file, shared with the other Eurth tools',
+  'Works offline',
 ];
 const picks = templates.slice(0, 6);
 ---
 
-<Base title="Flagwright: free online flag maker for worldbuilders" jsonld={jsonld}>
-  <div class="hero">
-    <h1>Flag maker: design a flag for your country, city or cause</h1>
-    <p>
-      Four choices in <strong>Simple</strong> mode, every layer by hand in <strong>Advanced</strong>. Free, in your browser, no
-      account. Download as SVG or PNG.
-    </p>
-  </div>
+<Page site={site} jsonld={[webApplication(site, { featureList, screenshot: `${site.url}/og.png` }), faqPage(faq)]}>
+  <div class="eu-stack">
+    <header class="eu-stack intro">
+      <p class="eu-kicker">Flagwright, by Eurth</p>
+      <h1>Flag maker: design a flag for your country, city or cause</h1>
+      <p class="eu-lead">
+        Four choices in <strong>Simple</strong> mode, every layer by hand in <strong>Advanced</strong>. Free, in your browser, no account needed. Download as SVG or PNG.
+      </p>
+    </header>
 
-  <Maker client:load />
+    <!-- client:load draws the maker as real HTML first, then wakes it up. -->
+    <Maker client:load siteName={site.name} siteUrl={site.url} />
 
-  <div class="page">
-    <div class="prose">
+    <section class="eu-prose">
       <h2 id="how">How to make a flag</h2>
-      <ol class="steps">
+      <ol>
         {steps.map((s) => <li><strong>{s.name}.</strong> {s.text}</li>)}
       </ol>
       <p>
-        Want more control? Switch to <strong>Advanced</strong>: your simple flag opens as bands and layers you can move, resize,
-        turn, restack and recolour one by one. Drag a layer on the flag, or type exact numbers.
+        Want more control? Switch to <strong>Advanced</strong>: your simple flag opens as bands and layers you can move, resize, turn, restack and recolour one by one. Drag a layer on the flag, or type exact numbers.
       </p>
-    </div>
+    </section>
 
-    <h2 id="start" class="section">Start from a classic layout</h2>
-    <ul class="picks">
-      {
-        picks.map((t) => (
-          <li>
-            <a href={`/#s=${encodeSimple(t.simple)}`}>
-              <Flag flag={fromSimple(t.simple)} id={`pick-${t.id}`} title={t.name} />
-              <span>{t.name}</span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="links">
-      <a class="btn" href="/templates/"><Fa icon={faSwatchbook} /> All {templates.length} templates</a>
-      <a class="btn" href="/guide/"><Fa icon={faWandMagicSparkles} /> How to design a good flag</a>
-      <a class="btn" href="/glossary/"><Fa icon={faBookAtlas} /> Flag terms explained</a>
-    </p>
+    <section class="eu-stack">
+      <h2 id="start">Start from a classic layout</h2>
+      <ul class="picks">
+        {
+          picks.map((t) => (
+            <li>
+              <a class="eu-card" href={simpleLink(t.simple)}>
+                <Flag flag={fromSimple(t.simple)} id={`pick-${t.id}`} title={t.name} />
+                <span>{t.name}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="eu-row">
+        <a class="eu-btn" href="/templates/"><Fa icon={faSwatchbook} /> All {templates.length} templates</a>
+        <a class="eu-btn" href="/guide/"><Fa icon={faWandMagicSparkles} /> How to design a good flag</a>
+        <a class="eu-btn" href="/glossary/"><Fa icon={faBookAtlas} /> Flag terms explained</a>
+      </p>
+    </section>
 
-    <div class="prose">
+    <section class="eu-prose">
       <h2 id="questions">Questions</h2>
       {
         faq.map((f) => (
@@ -154,88 +136,63 @@ const picks = templates.slice(0, 6);
           </details>
         ))
       }
-    </div>
+    </section>
   </div>
-</Base>
+
+  <Credits slot="inspirations" />
+</Page>
 
 <style>
-  .hero {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--space-2) var(--space-4) var(--space-3);
-  }
-
-  .hero h1 {
-    margin: 0;
-    font-size: 21px;
-    line-height: 1.25;
-    text-wrap: balance;
-  }
-
-  .hero p {
-    max-width: 760px;
-    margin: var(--space-1) 0 0;
-    color: var(--ink-muted);
-  }
-
-  .section {
-    margin: var(--space-8) 0 var(--space-3);
-    font-size: 21px;
-  }
-
-  .steps {
-    padding-left: 1.3em;
-  }
-
-  .steps li {
-    margin-bottom: var(--space-2);
+  .intro {
+    gap: var(--space-2);
   }
 
   .picks {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(calc(3 * var(--size-target) + var(--space-6)), 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .picks a {
-    display: grid;
-    gap: var(--space-2);
-    color: var(--ink);
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .picks a:hover span:last-child {
-    color: var(--accent-text);
-    text-decoration: underline;
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin: var(--space-4) 0 0;
-  }
-
-  .links .btn {
-    text-decoration: none;
+  .picks .eu-card {
+    padding: var(--space-3);
+    font: var(--type-label);
   }
 
   .faq {
+    margin-top: 0;
     border-bottom: 1px solid var(--line);
   }
 
   .faq summary {
-    padding: var(--space-3) 0;
-    font-size: 16px;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--size-target);
+    padding: var(--space-2) 0;
+    font: var(--type-heading);
     cursor: pointer;
   }
 
+  .faq summary::before {
+    content: '+';
+    flex: none;
+    width: var(--space-4);
+    color: var(--ink-muted);
+    text-align: center;
+  }
+
+  .faq[open] summary::before {
+    content: '−';
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
   .faq p {
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-4) var(--space-6);
   }
 </style>

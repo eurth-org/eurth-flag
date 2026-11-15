@@ -1,0 +1,14 @@
+---
+// Flagwright's own inspirations, for the footer's "inspirations" slot on every page.
+import { ref } from '@eurth/style/build';
+import { site } from '../../eurth.config.mjs';
+
+const out = (href: string) => ref(href, site.host);
+---
+
+<Fragment>
+  Flagwright takes after two tools that taught a generation of worldbuilders to make flags,{' '}
+  <a href={out('https://scrontch.eu/flags/')}>Scrontch’s Flag Designer</a> by Lars Ruoff and{' '}
+  <a href={out('https://andrewsarnold.github.io/FlagMaker-Jr/')}>FlagMaker Jr.</a> by Andrew Arnold. Its design check follows the five principles Ted Kaye set out in
+  <cite>Good Flag, Bad Flag</cite> for the <a href={out('https://nava.org')}>North American Vexillological Association</a>: a guide, not a law.
+</Fragment>

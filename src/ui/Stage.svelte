@@ -151,11 +151,9 @@
     max-width: calc(var(--stage-h, 62vh) * var(--ratio));
     margin: 0 auto;
     overflow: hidden;
-    border-radius: var(--radius-sm);
     /* A thin edge, so a white flag shows on a white page. */
-    box-shadow:
-      0 0 0 1px var(--line-strong),
-      0 6px 20px rgb(0 0 0 / 0.18);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
     line-height: 0;
     touch-action: pan-y;
   }
@@ -192,21 +190,21 @@
     vector-effect: non-scaling-stroke;
   }
 
-  /* Dark dashes over a white line: seen on any colour. */
+  /* Dark dashes over a white line: seen on any colour a flag can have, in either theme. */
   .halo {
-    stroke: #ffffff;
+    stroke: var(--paper);
     stroke-width: 3;
   }
 
   .box {
-    stroke: #002b36;
+    stroke: var(--night);
     stroke-width: 1.5;
     stroke-dasharray: 6 4;
   }
 
   .guides path {
     fill: none;
-    stroke: #ffffff;
+    stroke: var(--paper);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
     mix-blend-mode: difference;

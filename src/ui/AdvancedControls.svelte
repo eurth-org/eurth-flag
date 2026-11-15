@@ -16,6 +16,7 @@
     faTrash,
     faXmark,
   } from '@fortawesome/free-solid-svg-icons';
+  import Icon from '@eurth/style/components/Icon.svelte';
   import { contrast } from '../flag/colors';
   import { describeOverlay } from '../flag/describe';
   import { emblem } from '../flag/emblems';
@@ -24,7 +25,6 @@
   import { colorUnder } from '../flag/review';
   import ColorButton from './ColorButton.svelte';
   import EmblemPicker from './EmblemPicker.svelte';
-  import Icon from './Icon.svelte';
   import Slider from './Slider.svelte';
 
   // Advanced mode: proportions, the field band by band, and any number of layers, each with its
@@ -126,12 +126,13 @@
   };
 </script>
 
-<section class="panel" aria-labelledby="adv-ratio-title">
-  <h2 id="adv-ratio-title"><Icon icon={faRulerCombined} /> Proportions</h2>
+<section class="eu-card" aria-labelledby="adv-ratio-title">
+  <h2 id="adv-ratio-title" class="fw-heading"><Icon icon={faRulerCombined} /> Proportions</h2>
   <div class="ratio">
-    <label>
-      <span class="visually-hidden">Common proportions</span>
+    <label class="common">
+      <span class="eu-visually-hidden">Common proportions</span>
       <select
+        class="eu-select"
         value={ratios.some((r) => r.ratio[0] === flag.ratio[0] && r.ratio[1] === flag.ratio[1]) ? flag.ratio.join(':') : ''}
         onchange={(e) => {
           const r = ratios.find((x) => x.ratio.join(':') === e.currentTarget.value);
@@ -145,65 +146,65 @@
       </select>
     </label>
     <span class="hw">
-      <label><span class="visually-hidden">Height</span><input type="number" min="1" max="40" value={flag.ratio[0]} onchange={(e) => (flag.ratio[0] = Math.min(40, Math.max(1, Math.round(Number(e.currentTarget.value)) || 1)))} /></label>
+      <label><span class="eu-visually-hidden">Height</span><input class="eu-input eu-input--data" type="number" min="1" max="40" value={flag.ratio[0]} onchange={(e) => (flag.ratio[0] = Math.min(40, Math.max(1, Math.round(Number(e.currentTarget.value)) || 1)))} /></label>
       <span aria-hidden="true">:</span>
-      <label><span class="visually-hidden">Width</span><input type="number" min="1" max="40" value={flag.ratio[1]} onchange={(e) => (flag.ratio[1] = Math.min(40, Math.max(1, Math.round(Number(e.currentTarget.value)) || 1)))} /></label>
-      <span class="hint">height : width</span>
+      <label><span class="eu-visually-hidden">Width</span><input class="eu-input eu-input--data" type="number" min="1" max="40" value={flag.ratio[1]} onchange={(e) => (flag.ratio[1] = Math.min(40, Math.max(1, Math.round(Number(e.currentTarget.value)) || 1)))} /></label>
+      <span class="eu-help">height : width</span>
     </span>
   </div>
 </section>
 
-<section class="panel" aria-labelledby="adv-field-title">
-  <h2 id="adv-field-title"><Icon icon={faBorderAll} /> Field</h2>
-  <fieldset class="pills">
-    <legend class="visually-hidden">How the field is divided</legend>
+<section class="eu-card" aria-labelledby="adv-field-title">
+  <h2 id="adv-field-title" class="fw-heading"><Icon icon={faBorderAll} /> Field</h2>
+  <fieldset class="fw-options">
+    <legend class="eu-visually-hidden">How the field is divided</legend>
     {#each kinds as k (k.id)}
-      <label class="pill">
+      <label class="eu-pill">
         <input type="radio" name="field-kind" value={k.id} checked={kind === k.id} onchange={() => setKind(k.id)} />
-        <span class="check"><Icon icon={faCheck} /></span>
-        <span class="steady" data-text={k.name}>{k.name}</span>
+        <span class="eu-check"><Icon icon={faCheck} /></span>
+        {k.name}
       </label>
     {/each}
   </fieldset>
 
   {#if d.type === 'bands'}
-    <ol class="bands">
+    <ol class="fw-rows">
       {#each d.bands as band, i (i)}
-        <li>
+        <li class="band">
           <ColorButton value={band.color} label="Band {i + 1}" name="band-{i}" onchange={(c) => (band.color = c)} />
           <div class="grow">
             <Slider value={band.weight} label="Width" min={0.5} max={10} step={0.5} onchange={(v) => (band.weight = Math.min(20, Math.max(0.1, v)))} />
           </div>
           <span class="row-tools">
-            <button class="btn tool" aria-label="Move band {i + 1} {d.dir === 'h' ? 'up' : 'towards the hoist'}" disabled={i === 0} onclick={() => moveBand(i, -1)}><Icon icon={faArrowUp} /></button>
-            <button class="btn tool" aria-label="Move band {i + 1} {d.dir === 'h' ? 'down' : 'towards the fly'}" disabled={i === d.bands.length - 1} onclick={() => moveBand(i, 1)}><Icon icon={faArrowDown} /></button>
-            <button class="btn tool" aria-label="Remove band {i + 1}" disabled={d.bands.length === 1} onclick={() => d.type === 'bands' && d.bands.splice(i, 1)}><Icon icon={faXmark} /></button>
+            <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Move band {i + 1} {d.dir === 'h' ? 'up' : 'towards the hoist'}" disabled={i === 0} onclick={() => moveBand(i, -1)}><Icon icon={faArrowUp} /></button>
+            <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Move band {i + 1} {d.dir === 'h' ? 'down' : 'towards the fly'}" disabled={i === d.bands.length - 1} onclick={() => moveBand(i, 1)}><Icon icon={faArrowDown} /></button>
+            <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Remove band {i + 1}" disabled={d.bands.length === 1} onclick={() => d.type === 'bands' && d.bands.splice(i, 1)}><Icon icon={faXmark} /></button>
           </span>
         </li>
       {/each}
     </ol>
-    <div class="buttons">
-      <button class="btn" onclick={addBand} disabled={d.bands.length >= MAX_BANDS}><Icon icon={faPlus} /> Add a band</button>
-      <button class="btn" onclick={() => d.type === 'bands' && d.bands.forEach((b) => (b.weight = 1))}><Icon icon={faArrowsLeftRight} /> Equal widths</button>
+    <div class="eu-row">
+      <button type="button" class="eu-btn" onclick={addBand} disabled={d.bands.length >= MAX_BANDS}><Icon icon={faPlus} /> Add a band</button>
+      <button type="button" class="eu-btn" onclick={() => d.type === 'bands' && d.bands.forEach((b) => (b.weight = 1))}><Icon icon={faArrowsLeftRight} /> Equal widths</button>
     </div>
-    <p class="hint">Bands run from {d.dir === 'h' ? 'the top down' : 'the hoist to the fly'}. Widths are shares: 1, 2, 1 makes the middle band twice as wide.</p>
+    <p class="eu-help">Bands run from {d.dir === 'h' ? 'the top down' : 'the hoist to the fly'}. Widths are shares: 1, 2, 1 makes the middle band twice as wide.</p>
   {:else}
     <div class="pair">
-      <ColorButton value={d.colors[0]} label="First colour" name="field-a" onchange={(c) => d.type !== 'bands' && (d.colors[0] = c)} />
-      <button class="btn tool" aria-label="Swap the two colours" data-tip="Swap colours" data-tip-align="start" onclick={swapColors}><Icon icon={faRightLeft} /></button>
-      <ColorButton value={d.colors[1]} label="Second colour" name="field-b" onchange={(c) => d.type !== 'bands' && (d.colors[1] = c)} />
+      <ColorButton named value={d.colors[0]} label="First colour" name="field-a" onchange={(c) => d.type !== 'bands' && (d.colors[0] = c)} />
+      <button type="button" class="eu-btn eu-btn--icon" aria-label="Swap the two colours" data-tip="Swap colours" data-tip-align="start" onclick={swapColors}><Icon icon={faRightLeft} /></button>
+      <ColorButton named value={d.colors[1]} label="Second colour" name="field-b" onchange={(c) => d.type !== 'bands' && (d.colors[1] = c)} />
     </div>
     {#if d.type === 'grid'}
       <Slider value={d.cols} label="Across" min={1} max={16} onchange={(v) => d.type === 'grid' && (d.cols = Math.min(24, Math.max(1, Math.round(v))))} />
       <Slider value={d.rows} label="Down" min={1} max={16} onchange={(v) => d.type === 'grid' && (d.rows = Math.min(24, Math.max(1, Math.round(v))))} />
     {:else if d.type === 'bend'}
-      <fieldset class="pills">
-        <legend class="visually-hidden">Which diagonal</legend>
+      <fieldset class="fw-options">
+        <legend class="eu-visually-hidden">Which diagonal</legend>
         {#each [{ id: 'down', name: 'Upper hoist to lower fly' }, { id: 'up', name: 'Lower hoist to upper fly' }] as const as way (way.id)}
-          <label class="pill">
+          <label class="eu-pill">
             <input type="radio" name="bend-dir" value={way.id} checked={d.dir === way.id} onchange={() => d.type === 'bend' && (d.dir = way.id)} />
-            <span class="check"><Icon icon={faCheck} /></span>
-            <span class="steady" data-text={way.name}>{way.name}</span>
+            <span class="eu-check"><Icon icon={faCheck} /></span>
+            {way.name}
           </label>
         {/each}
       </fieldset>
@@ -213,12 +214,12 @@
   {/if}
 </section>
 
-<section class="panel" aria-labelledby="adv-layers-title">
-  <h2 id="adv-layers-title"><Icon icon={faLayerGroup} /> Layers <span class="count">{flag.overlays.length}</span></h2>
-  <p class="intro">Everything laid over the field, topmost first. Click a layer here or on the flag to change it; drag it on the flag to move it.</p>
+<section class="eu-card" aria-labelledby="adv-layers-title">
+  <h2 id="adv-layers-title" class="fw-heading"><Icon icon={faLayerGroup} /> Layers <span class="fw-count">{flag.overlays.length}</span></h2>
+  <p class="eu-help">Everything laid over the field, topmost first. Click a layer here or on the flag to change it; drag it on the flag to move it.</p>
 
-  <div class="buttons">
-    <button class="btn btn-primary" aria-expanded={adding} disabled={full} onclick={() => ((adding = !adding), (choosingEmblem = false))}>
+  <div class="eu-row">
+    <button type="button" class="eu-btn" aria-expanded={adding} disabled={full} onclick={() => ((adding = !adding), (choosingEmblem = false))}>
       <Icon icon={adding ? faXmark : faPlus} />
       {adding ? 'Close' : 'Add a layer'}
     </button>
@@ -227,43 +228,41 @@
   {#if adding}
     <div class="adder">
       {#each groups as group (group)}
-        <p class="group">{group}</p>
-        <div class="types">
+        <p class="eu-kicker">{group}</p>
+        <div class="eu-row types">
           {#each overlayDefs.filter((def) => def.group === group) as def (def.type)}
-            <button class="btn" title={def.hint} onclick={() => (def.type === 'emblem' ? (choosingEmblem = !choosingEmblem) : add(def.type))} aria-expanded={def.type === 'emblem' ? choosingEmblem : undefined}>
+            <button type="button" class="eu-btn" title={def.hint} onclick={() => (def.type === 'emblem' ? (choosingEmblem = !choosingEmblem) : add(def.type))} aria-expanded={def.type === 'emblem' ? choosingEmblem : undefined}>
               {def.name}{def.type === 'emblem' ? '…' : ''}
             </button>
           {/each}
         </div>
       {/each}
       {#if choosingEmblem}
-        <div class="emblem-choice">
-          <EmblemPicker onpick={(id) => add('emblem', { icon: id })} />
-        </div>
+        <EmblemPicker onpick={(id) => add('emblem', { icon: id })} />
       {/if}
     </div>
   {/if}
 
   {#if flag.overlays.length}
-    <ol class="layers" reversed>
+    <ol class="fw-rows" reversed>
       {#each flag.overlays.map((o, index) => ({ o, index })).reverse() as { o, index } (o.id)}
         {@const def = overlayDef(o.type)}
         {@const icon = o.type === 'emblem' ? emblem(o.icon) : undefined}
-        <li class:selected={selected === o.id} class:hidden={o.hidden}>
+        <li class="layer" class:selected={selected === o.id} class:hidden={o.hidden}>
           <div class="layer-row">
             <ColorButton value={o.color} label={label(o)} name="layer-{o.id}" onchange={(c) => (o.color = c)} />
-            <button class="layer-name" aria-expanded={selected === o.id} onclick={() => (selected = selected === o.id ? null : o.id)}>
+            <button type="button" class="eu-btn eu-btn--quiet layer-name" aria-expanded={selected === o.id} onclick={() => (selected = selected === o.id ? null : o.id)}>
               {#if icon}
-                <svg class="mini" viewBox="0 0 {icon.width} {icon.height}" aria-hidden="true"><path fill="currentColor" d={icon.path} /></svg>
+                <svg class="eu-icon" viewBox="0 0 {icon.width} {icon.height}" aria-hidden="true"><path fill="currentColor" d={icon.path} /></svg>
               {/if}
-              <span>{label(o)}</span>
+              <span>{label(o)}{o.hidden ? ' (hidden)' : ''}</span>
             </button>
             <span class="row-tools">
-              <button class="btn tool" aria-label="{o.hidden ? 'Show' : 'Hide'}: {label(o)}" aria-pressed={!!o.hidden} onclick={() => (o.hidden = !o.hidden)}><Icon icon={o.hidden ? faEyeSlash : faEye} /></button>
-              <button class="btn tool" aria-label="Bring forward: {label(o)}" disabled={index === flag.overlays.length - 1} onclick={() => restack(index, 1)}><Icon icon={faArrowUp} /></button>
-              <button class="btn tool" aria-label="Send back: {label(o)}" disabled={index === 0} onclick={() => restack(index, -1)}><Icon icon={faArrowDown} /></button>
-              <button class="btn tool" aria-label="Duplicate: {label(o)}" disabled={full} onclick={() => duplicate(o)}><Icon icon={faClone} /></button>
-              <button class="btn tool" aria-label="Delete: {label(o)}" onclick={() => remove(o.id)}><Icon icon={faTrash} /></button>
+              <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="{o.hidden ? 'Show' : 'Hide'}: {label(o)}" onclick={() => (o.hidden = !o.hidden)}><Icon icon={o.hidden ? faEyeSlash : faEye} /></button>
+              <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Bring forward: {label(o)}" disabled={index === flag.overlays.length - 1} onclick={() => restack(index, 1)}><Icon icon={faArrowUp} /></button>
+              <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Send back: {label(o)}" disabled={index === 0} onclick={() => restack(index, -1)}><Icon icon={faArrowDown} /></button>
+              <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Duplicate: {label(o)}" disabled={full} onclick={() => duplicate(o)}><Icon icon={faClone} /></button>
+              <button type="button" class="eu-btn eu-btn--quiet eu-btn--icon" aria-label="Delete: {label(o)}" onclick={() => remove(o.id)}><Icon icon={faTrash} /></button>
             </span>
           </div>
           {#if selected === o.id}
@@ -279,64 +278,36 @@
                   onchange={(v) => (o[param.key] = clampParam(param, v))}
                 />
               {/each}
-              <div class="buttons">
+              <div class="eu-row">
                 {#if movable(o.type) && def.params.some((p) => p.key === 'x') && def.params.some((p) => p.key === 'y')}
-                  <button class="btn" onclick={() => ((o.x = 50), (o.y = 50))}><Icon icon={faBullseye} /> Centre</button>
+                  <button type="button" class="eu-btn" onclick={() => ((o.x = 50), (o.y = 50))}><Icon icon={faBullseye} /> Centre</button>
                 {/if}
                 {#if o.type === 'emblem'}
-                  <label class="pill plain">
+                  <label class="eu-pill">
                     <input type="checkbox" checked={!!o.mirror} onchange={(e) => (o.mirror = e.currentTarget.checked)} />
+                    <span class="eu-check"><Icon icon={faCheck} /></span>
                     <Icon icon={faRightLeft} /> Mirrored
                   </label>
                 {/if}
               </div>
               {#if o.type === 'emblem'}
                 <details class="swap">
-                  <summary>Change the emblem</summary>
+                  <summary class="eu-btn">Change the emblem</summary>
                   <EmblemPicker current={o.icon} onpick={(id) => (o.icon = id)} />
                 </details>
               {/if}
-              <p class="hint">{def.hint}</p>
+              <p class="eu-help">{def.hint}</p>
             </div>
           {/if}
         </li>
       {/each}
     </ol>
   {:else}
-    <p class="empty">No layers yet: a plain field. Add a cross, a star or an emblem.</p>
+    <p class="eu-help">No layers yet: a plain field. Add a cross, a star or an emblem.</p>
   {/if}
 </section>
 
 <style>
-  h2 {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin: 0 0 var(--space-3);
-    font-size: 16px;
-  }
-
-  .count {
-    padding: 0 7px;
-    border-radius: 999px;
-    background: var(--button);
-    color: var(--ink-muted);
-    font-size: 12px;
-  }
-
-  .intro {
-    margin: calc(-1 * var(--space-2)) 0 var(--space-3);
-    color: var(--ink-muted);
-    font-size: 13px;
-  }
-
-  .hint,
-  .empty {
-    margin: var(--space-2) 0 0;
-    color: var(--ink-muted);
-    font-size: 13px;
-  }
-
   .ratio {
     display: flex;
     flex-wrap: wrap;
@@ -344,168 +315,96 @@
     gap: var(--space-3);
   }
 
-  select,
-  .hw input {
-    padding: 5px 8px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-control);
-    background: var(--surface);
-  }
-
-  select {
-    max-width: 100%;
+  .common {
+    flex: 1 1 calc(5 * var(--size-target));
+    min-width: 0;
   }
 
   .hw {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-2);
   }
 
   .hw input {
-    width: 56px;
+    width: calc(2 * var(--size-target));
     text-align: center;
   }
 
-  .hw .hint {
-    margin: 0;
-  }
-
-  fieldset.pills {
+  .band {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    min-width: 0;
-    margin: 0 0 var(--space-3);
-    padding: 0;
-    border: 0;
-  }
-
-  .bands,
-  .layers {
-    display: grid;
-    gap: var(--space-2);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .bands li {
-    display: flex;
     align-items: center;
     gap: var(--space-2);
   }
 
   .grow {
-    flex: 1;
+    flex: 1 1 calc(5 * var(--size-target));
     min-width: 0;
   }
 
   .row-tools {
     display: inline-flex;
-    gap: 2px;
     flex: none;
+    margin-left: auto;
   }
 
-  .tool {
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-  }
-
-  .tool:disabled {
-    opacity: 0.35;
-    cursor: default;
-    box-shadow: none;
-    transform: none;
-  }
-
-  .buttons {
+  /* Two colour buttons and the swap between them; the palette opens under the row. */
+  .pair {
+    position: relative;
+    --color-anchor: static;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
-    margin-top: var(--space-3);
-  }
-
-  .pair {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
   }
 
   .adder {
-    margin-top: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
     padding: var(--space-3);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-md);
     background: var(--surface);
-  }
-
-  .group {
-    margin: var(--space-3) 0 var(--space-1);
-    color: var(--ink-muted);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .group:first-child {
-    margin-top: 0;
   }
 
   .types {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--space-2);
   }
 
-  .emblem-choice {
-    margin-top: var(--space-3);
-  }
-
-  .layers {
-    margin-top: var(--space-3);
-  }
-
-  .layers li {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-control);
+  .layer {
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
     background: var(--surface);
   }
 
-  .layers li.selected {
+  /* The layer being changed: a thicker edge, and its numbers open beneath it. */
+  .layer.selected {
     border-color: var(--selected);
-    box-shadow: 0 0 0 1px var(--selected);
+    box-shadow: inset 0 0 0 1px var(--selected);
   }
 
-  .layers li.hidden .layer-name {
+  .layer.hidden .layer-name {
     color: var(--ink-muted);
     text-decoration: line-through;
   }
 
   .layer-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2);
-    padding: 6px;
+    gap: var(--space-1);
+    padding: var(--space-1);
   }
 
   .layer-name {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+    flex: 1 1 calc(4 * var(--size-target));
+    justify-content: flex-start;
     min-width: 0;
-    padding: 4px;
-    border: 0;
-    border-radius: var(--radius-control);
-    background: none;
+    padding: 0 var(--space-2);
+    font: var(--type-body);
     text-align: left;
-    cursor: pointer;
   }
 
   .layer-name span {
@@ -514,40 +413,23 @@
     white-space: nowrap;
   }
 
-  .layer-name:hover {
-    background: var(--hover);
-  }
-
-  .mini {
-    flex: none;
-    width: 16px;
-    height: 16px;
-  }
-
   .params {
     display: grid;
-    gap: 6px;
-    padding: var(--space-2) var(--space-3) var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-3);
     border-top: 1px solid var(--line);
   }
 
-  .params .buttons {
-    margin-top: var(--space-1);
+  .swap[open] summary {
+    margin-bottom: var(--space-2);
   }
 
   .swap summary {
-    margin: var(--space-1) 0 var(--space-2);
-    color: var(--accent-text);
-    cursor: pointer;
+    display: inline-flex;
+    list-style: none;
   }
 
-  @media (max-width: 520px) {
-    .layer-row {
-      flex-wrap: wrap;
-    }
-
-    .row-tools {
-      margin-left: auto;
-    }
+  .swap summary::-webkit-details-marker {
+    display: none;
   }
 </style>

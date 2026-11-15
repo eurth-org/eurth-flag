@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { niceWatcher } from '@eurth/style';
+
   // A number as a slider with its value beside it, editable either way.
   let {
     value,
@@ -10,61 +12,70 @@
     onchange,
   }: { value: number; label: string; min: number; max: number; step?: number; unit?: string; onchange: (value: number) => void } = $props();
 
+  const id = $props.id();
   const fill = $derived(Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)));
+  let range: HTMLInputElement | undefined = $state();
 
   function set(raw: string) {
     const n = Number(raw);
     if (raw !== '' && Number.isFinite(n)) onchange(n);
   }
+
+  // The suite's wink: "Nice." when a number settles on 69.
+  const watch = niceWatcher();
+  $effect(() => watch(value, () => range));
 </script>
 
-<label class="slider">
-  <span class="name">{label}</span>
-  <input class="range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
+<div class="room">
+<div class="slider">
+  <label class="eu-label" for="{id}-range">{label}</label>
+  <input bind:this={range} id="{id}-range" class="eu-range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
   <span class="number">
-    <input type="number" {step} {value} aria-label="{label}{unit ? ` (${unit})` : ''}" onchange={(e) => set(e.currentTarget.value)} />
-    <span class="unit" aria-hidden="true">{unit}</span>
+    <input class="eu-input eu-input--data" type="number" {step} {value} aria-label="{label}{unit ? ` (${unit})` : ''}, as a number" onchange={(e) => set(e.currentTarget.value)} />
+    <span class="unit eu-help" aria-hidden="true">{unit}</span>
   </span>
-</label>
+</div>
+</div>
 
 <style>
-  .slider {
-    display: grid;
-    grid-template-columns: 96px minmax(0, 1fr) 78px;
-    align-items: center;
-    gap: var(--space-2);
+  .room {
+    container-type: inline-size;
   }
 
-  .name {
+  .slider {
+    display: grid;
+    grid-template-columns: calc(2 * var(--size-target)) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .eu-label {
     color: var(--ink-muted);
-    font-size: 13px;
   }
 
   .number {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--space-1);
   }
 
   .number input {
-    width: 58px;
-    padding: 2px 4px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-control);
-    background: var(--surface);
+    width: calc(2 * var(--size-target));
     text-align: right;
-    font-variant-numeric: tabular-nums;
   }
 
   .unit {
-    width: 14px;
-    color: var(--ink-muted);
-    font-size: 12px;
+    width: var(--space-4);
   }
 
-  @media (max-width: 420px) {
+  /* Where there's little room, the name gets a line of its own. */
+  @container (max-width: 400px) {
     .slider {
-      grid-template-columns: 72px minmax(0, 1fr) 70px;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .eu-label {
+      grid-column: 1 / -1;
     }
   }
 </style>

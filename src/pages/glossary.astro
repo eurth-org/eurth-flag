@@ -1,10 +1,20 @@
 ---
 // The words flags are described in, each in a sentence, with a picture where one helps.
+// Each term has an id to link to, and the whole set is given to search engines as a DefinedTermSet.
+import { resolveColors } from '@eurth/style';
+import { definedTermSet } from '@eurth/style/build';
+import Page from '@eurth/style/components/Page.astro';
+import tokens from '@eurth/style/tokens.json';
+import { site } from '../../eurth.config.mjs';
+import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
-import { encodeSimple } from '../flag/link';
+import { simpleLink } from '../flag/link';
 import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
-import Base from '../layouts/Base.astro';
-import { site } from '../lib/site';
+
+// The diagram's labels can't use the stylesheet's custom properties (it is a picture of a flag,
+// the same in both themes), so they take the brand's own pair from the tokens: night on Eurth
+// blue, at the size the handbook asks for.
+const night = resolveColors(tokens, 'dark').night;
 
 const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', colors: ['#0a1f5c', '#ffffff', '#ce1126'], ...changes });
 
@@ -84,37 +94,24 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
 
 const all = groups.flatMap((g) => g.terms);
 const anchor = (term: string) => term.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
-const jsonld = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'DefinedTermSet',
-    '@id': `${site.url}/glossary/`,
-    name: 'Glossary of flag terms',
-    description: 'The vocabulary of vexillology, in plain English.',
-    hasDefinedTerm: all.map((t) => ({
-      '@type': 'DefinedTerm',
-      name: t.term,
-      ...(t.also ? { alternateName: t.also } : {}),
-      description: t.text,
-      url: `${site.url}/glossary/#${anchor(t.term)}`,
-    })),
-  },
-];
+const title = `Flag terms explained: a glossary of ${all.length} vexillology words`;
+const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.text }));
 ---
 
-<Base
-  title={`Flag terms explained: a glossary of ${all.length} vexillology words`}
-  description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of vexillology for worldbuilders."
-  crumb="Glossary"
-  jsonld={jsonld}
+<Page
+  site={site}
+  title={title}
+  description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of flag terms for worldbuilders."
+  crumbs={[{ name: 'Glossary', path: '/glossary/' }]}
+  jsonld={[definedTermSet(site, { name: 'Glossary of flag terms', path: '/glossary/', terms })]}
 >
-  <div class="page">
-    <p class="crumbs"><a href="/">Flag maker</a> › Glossary</p>
-    <div class="prose">
+  <div class="eu-stack">
+    <header class="eu-prose">
+      <p class="eu-kicker">Glossary</p>
       <h1>Flag terms explained</h1>
-      <p class="lede">
-        Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean,
-        in plain English. Every picture opens in the maker.
+      <p class="eu-lead">
+        Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean, in plain English. Every picture opens in the{' '}
+        <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the pieces make a good flag.
       </p>
 
       <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
@@ -125,13 +122,13 @@ const jsonld = [
           <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
           <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
           <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
-          <path d="M319 30V320" stroke="#fff" stroke-width="2" stroke-dasharray="6 6"></path>
-          <g font-family="system-ui, Arial, sans-serif" font-weight="700" font-size="20" fill="#fff" text-anchor="middle">
-            <text x="176" y="108">Canton</text>
+          <path d={`M319 30V320`} stroke={night} stroke-width="2" stroke-dasharray="6 6"></path>
+          <g font-family={tokens.type.families.sans} font-weight="700" font-size="20" fill={night} text-anchor="middle">
+            <text x="176" y="108" fill="#ffffff">Canton</text>
             <text x="176" y="262">Hoist</text>
             <text x="462" y="290">Fly</text>
             <text x="462" y="100">Charge</text>
-            <text x="560" y="58" font-size="16">Field</text>
+            <text x="560" y="58">Field</text>
           </g>
         </svg>
         <figcaption>The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.</figcaption>
@@ -140,30 +137,30 @@ const jsonld = [
       <nav class="jump" aria-label="Sections">
         {groups.map((g) => <a href={`#${g.id}`}>{g.title}</a>)}
       </nav>
-    </div>
+    </header>
 
     {
       groups.map((g) => (
-        <section id={g.id}>
-          <div class="prose">
+        <section id={g.id} class="eu-stack">
+          <div class="eu-prose">
             <h2>{g.title}</h2>
             <p>{g.intro}</p>
           </div>
           <dl class="terms">
             {g.terms.map((t) => (
               <div class="term" id={anchor(t.term)}>
-                {t.show && (
-                  <a class="pic" href={`/#s=${encodeSimple(t.show)}`} aria-label={`Open this ${t.term.toLowerCase()} in the flag maker`}>
-                    <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
-                  </a>
-                )}
-                <div>
-                  <dt>
-                    {t.term}
-                    {t.also && <span class="also">or {t.also}</span>}
-                  </dt>
-                  <dd>{t.text}</dd>
-                </div>
+                <dt>
+                  {t.term}
+                  {t.also && <span class="also">or {t.also}</span>}
+                </dt>
+                <dd>
+                  {t.show && (
+                    <a class="pic" href={simpleLink(t.show)} aria-label={`Open this ${t.term.toLowerCase()} in the flag maker`}>
+                      <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
+                    </a>
+                  )}
+                  <span>{t.text}</span>
+                </dd>
               </div>
             ))}
           </dl>
@@ -171,87 +168,84 @@ const jsonld = [
       ))
     }
 
-    <div class="prose">
-      <p><a class="btn btn-primary cta" href="/">Make your flag</a></p>
+    <div class="eu-prose">
+      <p><a class="eu-btn eu-btn--primary" href="/">Make your flag</a></p>
       <p>Next: <a href="/guide/">how to design a good flag</a>, or start from a <a href="/templates/">template</a>.</p>
     </div>
   </div>
-</Base>
+
+  <Credits slot="inspirations" />
+</Page>
 
 <style>
-  .anatomy {
-    margin: var(--space-4) 0;
-  }
-
   .anatomy svg {
     display: block;
     width: 100%;
-    max-width: 560px;
+    max-width: calc(13 * var(--size-target));
     height: auto;
   }
 
   .anatomy figcaption {
     margin-top: var(--space-2);
     color: var(--ink-muted);
-    font-size: 14px;
+    font: var(--type-body-sm);
   }
 
   .jump {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    font-weight: 600;
+    gap: 0 var(--space-5);
+    font: var(--type-label);
+  }
+
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    min-width: var(--size-target);
+    min-height: var(--size-target);
   }
 
   .terms {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(7 * var(--size-target))), 1fr));
     gap: var(--space-4);
-    margin: var(--space-3) 0 0;
+    margin: 0;
   }
 
   .term {
-    display: flex;
-    gap: var(--space-3);
-    align-items: start;
-    padding: var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-panel);
+    padding: var(--space-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
     background: var(--surface-raised);
     scroll-margin-top: var(--space-4);
   }
 
+  /* The term a link pointed at: an edge around it, and the browser has scrolled it into view. */
   .term:target {
     border-color: var(--selected);
-    box-shadow: 0 0 0 1px var(--selected);
+    box-shadow: inset 0 0 0 1px var(--selected);
   }
 
   .pic {
     flex: none;
-    width: 84px;
-    margin-top: 3px;
+    width: calc(2 * var(--size-target));
   }
 
   dt {
-    font-size: 16px;
-    font-weight: 700;
+    font: var(--type-heading);
   }
 
   .also {
-    margin-left: 4px;
+    margin-left: var(--space-1);
     color: var(--ink-muted);
-    font-size: 13px;
-    font-weight: 400;
+    font: var(--type-note);
   }
 
+  /* The picture beside the words that explain it. */
   dd {
-    margin: 2px 0 0;
-    line-height: 1.5;
-  }
-
-  @media (max-width: 400px) {
-    .terms {
-      grid-template-columns: 1fr;
-    }
+    display: flex;
+    gap: var(--space-3);
+    align-items: start;
+    margin: var(--space-2) 0 0;
   }
 </style>

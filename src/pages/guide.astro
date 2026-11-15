@@ -1,12 +1,22 @@
 ---
 // How to design a good flag: the five principles, each with a flag that follows it and one
 // that doesn't, drawn by the same engine as the maker.
+// Search engines get the breadcrumb and the article's date as structured data.
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { article, ref, wikipedia } from '@eurth/style/build';
+import Fa from '@eurth/style/components/Fa.astro';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
-import { encodeFlag, encodeSimple } from '../flag/link';
+import { advancedLink, simpleLink } from '../flag/link';
 import { newOverlay, type Flag as FlagData } from '../flag/model';
 import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
-import Base from '../layouts/Base.astro';
-import { ref, site, wikipedia } from '../lib/site';
+
+// The day the guide was last brought up to date.
+const updated = '2026-11-15';
+const headline = 'How to design a good flag: five principles, with examples';
+const description = 'The five principles of good flag design, for worldbuilders: keep it simple, mean something, few colours, no lettering, be distinctive. Each with examples that open in the flag maker.';
 
 const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', ...changes });
 
@@ -41,7 +51,7 @@ const seal: FlagData = {
 const distinct = s({ division: 'bend-up', colors: ['#fcd116', '#00847e', '#ffffff'], overlay: 'bend-sinister', overlayColor: '#000000' });
 const twin = s({ division: 'h3', colors: ['#ce1126', '#ffffff', '#0038a8'] });
 
-const open = (design: Simple | FlagData): string => ('division' in design && typeof design.division === 'string' ? `/#s=${encodeSimple(design as Simple)}` : `/#f=${encodeFlag(design as FlagData)}`);
+const open = (design: Simple | FlagData): string => (typeof design.division === 'string' ? simpleLink(design as Simple) : advancedLink(design as FlagData));
 const draw = (design: Simple | FlagData): FlagData => (typeof design.division === 'string' ? fromSimple(design as Simple) : (design as FlagData));
 
 const principles = [
@@ -96,120 +106,120 @@ const principles = [
   },
 ];
 
-const jsonld = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: 'How to design a good flag: five principles, with examples',
-    description: 'The five principles of good flag design explained for worldbuilders, each with a flag that follows it and one that does not.',
-    url: `${site.url}/guide/`,
-    image: `${site.url}/og.png`,
-    inLanguage: 'en',
-    author: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
-    publisher: { '@type': 'Organization', name: 'Eurth', url: 'https://eurth.org' },
-    datePublished: '2026-11-12',
-    dateModified: '2026-11-12',
-  },
-];
 ---
 
-<Base
-  title="How to design a good flag: five principles, with examples"
-  description="The five principles of good flag design, explained for worldbuilders: keep it simple, mean something, two or three colours, no lettering or seals, be distinctive. Each with a good and a bad example you can open in the flag maker."
-  crumb="Design guide"
-  jsonld={jsonld}
+<Page
+  site={site}
+  title={headline}
+  description={description}
+  crumbs={[{ name: 'Guide', path: '/guide/' }]}
+  jsonld={[article(site, { headline, path: '/guide/', description, updated })]}
 >
-  <div class="page">
-    <p class="crumbs"><a href="/">Flag maker</a> › Design guide</p>
-    <article class="prose">
-      <h1>How to design a good flag</h1>
-      <p class="lede">
-        Five principles, each with a flag that follows it and one that doesn’t. They are a summary of what works, not a law:
-        every example opens in the maker, so you can break the rule yourself and see.
-      </p>
-      <p>
-        The principles come from vexillology, the study of flags. Ted Kaye set them out in
-        <a href={ref('https://nava.org/good-flag-bad-flag')} target="_blank" rel="noopener"><cite>Good Flag, Bad Flag</cite></a>
-        for the North American Vexillological Association in 2006, drawing on what flag designers had said for a century.
-        They explain why some flags are loved and flown everywhere, and others hang unnoticed outside one office.
-      </p>
+  <article class="eu-prose">
+    <p class="eu-kicker">Guide</p>
+    <h1>How to design a good flag</h1>
+    <p class="eu-lead">
+      Five principles, each with a flag that follows it and one that doesn’t. They are a summary of what works, not a law: every example opens in the{' '}
+      <a href="/">maker</a>, so you can break the rule yourself and see.
+    </p>
+    <p>
+      The principles come from vexillology, the study of flags. Ted Kaye set them out in{' '}
+      <a href={ref('https://nava.org/good-flag-bad-flag', site.host)}><cite>Good Flag, Bad Flag</cite></a>{' '}
+      for the North American Vexillological Association in 2006, drawing on what flag designers had said for a century. They explain why some flags are loved and flown
+      everywhere, and others hang unnoticed outside one office.
+    </p>
 
-      {
-        principles.map((p) => (
-          <section id={p.id}>
-            <h2>{p.title}</h2>
-            {p.text.map((t) => <p>{t}</p>)}
-            <div class="examples">
-              <figure class="good">
-                <a href={open(p.good.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.good.design)} id={`${p.id}-good`} title="A flag that follows the principle" /></a>
-                <figcaption><strong>Does.</strong> {p.good.caption}</figcaption>
+    {
+      principles.map((p) => (
+        <section id={p.id} class="principle">
+          <h2>{p.title}</h2>
+          {p.text.map((t) => <p>{t}</p>)}
+          <div class="examples">
+            <figure>
+              <a href={open(p.good.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.good.design)} id={`${p.id}-good`} title="A flag that follows the principle" /></a>
+              <figcaption><strong class="does"><Fa icon={faCircleCheck} /> Does.</strong> {p.good.caption}</figcaption>
+            </figure>
+            {p.bad && (
+              <figure>
+                <a href={open(p.bad.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.bad.design)} id={`${p.id}-bad`} title="A flag that breaks the principle" /></a>
+                <figcaption><strong class="doesnt"><Fa icon={faCircleXmark} /> Doesn’t.</strong> {p.bad.caption}</figcaption>
               </figure>
-              {p.bad && (
-                <figure class="bad">
-                  <a href={open(p.bad.design)} aria-label="Open this flag in the maker"><Flag flag={draw(p.bad.design)} id={`${p.id}-bad`} title="A flag that breaks the principle" /></a>
-                  <figcaption><strong>Doesn’t.</strong> {p.bad.caption}</figcaption>
-                </figure>
-              )}
-            </div>
-          </section>
-        ))
-      }
+            )}
+          </div>
+        </section>
+      ))
+    }
 
-      <h2 id="breaking">When to break the rules</h2>
-      <p>
-        Often, if you know why. <a href={wikipedia('Flag of Maryland')} target="_blank" rel="noopener">Maryland’s flag</a> is
-        two clashing coats of arms quartered and is adored. <a href={wikipedia('Flag of South Africa')} target="_blank" rel="noopener">South Africa’s</a>
-        has six colours and works because one bold shape holds them. <a href={wikipedia('Flag of Wales')} target="_blank" rel="noopener">Wales</a> put a
-        detailed dragon on its flag and nobody has ever confused it with anything. Complexity that is the whole point can succeed;
-        complexity that crept in by committee rarely does.
-      </p>
-      <p>
-        In a fictional world, a bad flag can be good writing. A bureaucratic empire should have a seal on a bedsheet. A nation
-        founded last year by three rival factions might well fly three symbols. Let the flag say what the country is like.
-      </p>
+    <h2 id="breaking">When to break the rules</h2>
+    <p>
+      Often, if you know why. <a href={wikipedia('Flag of Maryland', site.host)}>Maryland’s flag</a> is two clashing coats of arms quartered and is adored.{' '}
+      <a href={wikipedia('Flag of South Africa', site.host)}>South Africa’s</a> has six colours and works because one bold shape holds them.{' '}
+      <a href={wikipedia('Flag of Wales', site.host)}>Wales</a> put a detailed dragon on its flag and nobody has ever confused it with anything. Complexity that is the whole
+      point can succeed; complexity that crept in by committee rarely does.
+    </p>
+    <p>
+      In a fictional world, a bad flag can be good writing. A bureaucratic empire should have a seal on a bedsheet. A nation founded last year by three rival factions might
+      well fly three symbols. Let the flag say what the country is like.
+    </p>
 
-      <h2 id="worldbuilding">Five more tips for worldbuilders</h2>
-      <ul>
-        <li><strong>Design the family first.</strong> Decide what neighbours share (a cross, a palette, a star) before drawing each flag.</li>
-        <li><strong>Give flags a history.</strong> Real flags change with regimes. An older version with one detail different is an afternoon’s work and a paragraph of lore.</li>
-        <li><strong>Mind what could be made.</strong> A medieval kingdom dyes with madder, woad and weld: reds, blues, yellows. Purple is for emperors.</li>
-        <li><strong>Check it small.</strong> On a map or in an infobox your flag is 30 pixels wide. The design check shows it at that size.</li>
-        <li><strong>Pick proportions on purpose.</strong> 2:3 is neutral, 1:2 feels naval and British, square feels Swiss or military.</li>
-      </ul>
+    <h2 id="worldbuilding">Five more tips for worldbuilders</h2>
+    <ul>
+      <li><strong>Design the family first.</strong> Decide what neighbours share (a cross, a palette, a star) before drawing each flag.</li>
+      <li><strong>Give flags a history.</strong> Real flags change with regimes. An older version with one detail different is an afternoon’s work and a paragraph of lore.</li>
+      <li><strong>Mind what could be made.</strong> A medieval kingdom dyes with madder, woad and weld: reds, blues, yellows. Purple is for emperors.</li>
+      <li><strong>Check it small.</strong> On a map or in an infobox your flag is 30 pixels wide. The design check shows it at that size.</li>
+      <li><strong>Pick proportions on purpose.</strong> 2:3 is neutral, 1:2 feels naval and British, square feels Swiss or military.</li>
+    </ul>
 
-      <p><a class="btn btn-primary cta" href="/">Make your flag</a></p>
-      <p>
-        New to the vocabulary? The <a href="/glossary/">glossary</a> explains hoist, fly, canton, saltire and the rest. Short on
-        ideas? Start from a <a href="/templates/">template</a>.
-      </p>
-    </article>
-  </div>
-</Base>
+    <p><a class="eu-btn eu-btn--primary" href="/">Make your flag</a></p>
+    <p>
+      New to the vocabulary? The <a href="/glossary/">glossary</a> explains hoist, fly, canton, saltire and the rest. Short on ideas? Start from a{' '}
+      <a href="/templates/">template</a>. When the flag looks right, give it a country: <a href={ref('https://eurth.org', site.host)}>Eurth</a> has a world for it to live in.
+    </p>
+
+    <h2 id="sources">Sources</h2>
+    <ul>
+      <li>
+        Ted Kaye, <a href={ref('https://nava.org/good-flag-bad-flag', site.host)}><cite>Good Flag, Bad Flag: How to Design a Great Flag</cite></a>, North American
+        Vexillological Association, 2006: the five principles.
+      </li>
+      <li><a href={wikipedia('Vexillology', site.host)}>Vexillology</a>, Wikipedia: the study of flags, and where its words come from.</li>
+      <li><a href={wikipedia('Rule of tincture', site.host)}>Rule of tincture</a>, Wikipedia: heraldry’s rule of contrast, light on dark and dark on light.</li>
+      <li><a href={wikipedia('Nordic cross flag', site.host)}>Nordic cross flag</a>, Wikipedia: a family of flags that look alike on purpose.</li>
+    </ul>
+    <p class="eu-muted">Last updated <time datetime={updated}>15 November 2026</time>.</p>
+  </article>
+
+  <Credits slot="inspirations" />
+</Page>
 
 <style>
-  .examples {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-4);
-    margin: var(--space-4) 0;
+  .principle > * + * {
+    margin-top: var(--space-4);
   }
 
-  figure {
-    margin: 0;
+  .examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(5 * var(--size-target)), 1fr));
+    gap: var(--space-4);
+  }
+
+  figure a {
+    display: block;
   }
 
   figcaption {
     margin-top: var(--space-2);
     color: var(--ink-muted);
-    font-size: 14px;
-    line-height: 1.45;
+    font: var(--type-body-sm);
   }
 
-  .good strong {
-    color: var(--good);
+  /* Said with a word and an icon as well as a colour. */
+  .does {
+    color: var(--success-text);
   }
 
-  .bad strong {
-    color: var(--danger);
+  .doesnt {
+    color: var(--danger-text);
   }
 </style>
