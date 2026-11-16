@@ -150,7 +150,7 @@ const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.
                     <a class="pic" href={simpleLink(t.show)} aria-label={t.open ?? `Open this ${t.term.toLowerCase()} in the flag maker`}>
                       <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
                     </a>
-                  )}{t.text}
+                  )}{' '}{t.text}
                 </dd>
               </div>
             ))}
