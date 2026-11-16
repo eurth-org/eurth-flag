@@ -376,10 +376,10 @@
       {/if}
       <!-- Random is the suite's button in Flagwright's own look. It rolls at once over a flag that
            is nobody's work yet; over one that has been changed it turns red when pointed at, says
-           so in its tooltip, and asks before the first roll. The span keeps the tooltip the button
-           has always had for as long as there is nothing to lose. -->
-      <span class="random" data-tip={changed ? undefined : 'A random flag that tries to look good'}>
-        <RandomButton onrandom={random} guard={changed} what="flag" class="btn" />
+           so in its tooltip, and asks before the first roll. Until then it keeps the tooltip it
+           has always had. -->
+      <span class="random">
+        <RandomButton onrandom={random} guard={changed} what="flag" class="btn" tip="A random flag that tries to look good" />
       </span>
       <span class="history">
         <button class="btn icon-only" data-click="swing-left" onclick={undo} disabled={!past.length} aria-label="Undo" data-tip="Undo (Ctrl or ⌘ Z)">
@@ -582,19 +582,6 @@
 
   .random {
     display: inline-flex;
-  }
-
-  /* The tooltip used to hang from the button itself: from inside its 1px edge, and a pixel
-     higher while the button rose under the pointer. It hangs in that same place still. */
-  .random[data-tip]:hover::after {
-    top: calc(100% + 5px);
-    right: 1px;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html:not([data-motion='still'])) .random[data-tip]:hover::after {
-      top: calc(100% + 4px);
-    }
   }
 
   /* Clicked, the dice tumble as Flagwright's own buttons do (the keyframes are in app.css). */
