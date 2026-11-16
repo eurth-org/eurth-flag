@@ -11,3 +11,4 @@ Every numbered point from the reviews, and the release that did it. The releases
 | 5 | Start page title in the suite's pattern; structured data from the suite's builders; a unique description on every page. | 0.2.0 |
 | 6 | A signature touch and an easter egg of Flagwright's own; "Nice." on the sliders. | 0.2.0 |
 | 7 | The suite's checks: `standardSuites`, axe at WCAG 2.2 AAA with 44px targets, the smoke test in real Chrome. | 0.2.0 |
+| 8 | Safari can't make WebP and saved a PNG named `.webp`: name a picture for what the browser made, and say so. | 0.2.0 |

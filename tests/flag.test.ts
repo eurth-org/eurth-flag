@@ -1,10 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { cleanColor, colorName, contrast } from '../src/flag/colors';
 import { describeFlag } from '../src/flag/describe';
 import { emblems } from '../src/flag/emblems';
 import { createProfile, getSection, parseProfile, serialiseProfile, setSection, validateProfile } from '@eurth/profile';
 import calderwyn from '@eurth/profile/examples/calderwyn.eurth.json';
-import { PICTURE_SIZES } from '@eurth/style';
+import { PICTURE_SIZES, pictureFilename } from '@eurth/style';
 import { advancedLink, cleanFlag, decodeFlag, decodeSimple, encodeFlag, encodeSimple, flagLink, fromAddress, fromHash, fromLink, fromQuery, simpleLink, toQuery } from '../src/flag/link';
 import { colorsOf, defaultFlag, newOverlay, overlayDefs, overlayTypes, type Flag } from '../src/flag/model';
 import { pictureSvg, placeFlag } from '../src/flag/picture';
@@ -274,6 +275,25 @@ describe('pictures in the sharing sizes', () => {
         expect(svg.match(/<svg/g)).toHaveLength(2);
       }
     }
+  });
+});
+
+describe('a picture is named for what the browser really made', () => {
+  // Safari can't make WebP on a canvas: asked for one it hands back a PNG. The maker names its
+  // downloads with the suite's helper (@eurth/style 1.3.0 or newer), so the ending is never a lie.
+  it('keeps the name asked for when the browser made that kind', () => {
+    expect(pictureFilename('flag-of-orioni', { type: 'image/png' }, 'image/png')).toMatchObject({ filename: 'flag-of-orioni.png', note: null });
+    expect(pictureFilename('flag-of-orioni-square', { type: 'image/webp' }, 'image/webp')).toMatchObject({ filename: 'flag-of-orioni-square.webp', note: null });
+  });
+  it('calls a PNG a PNG when the browser answers a request for WebP with one, and says so', () => {
+    const made = pictureFilename('flag-of-orioni', { type: 'image/png' }, 'image/webp');
+    expect(made.filename).toBe('flag-of-orioni.png');
+    expect(made.note).toBe('This browser can’t make WebP pictures, so this one is a PNG.');
+  });
+  it('is what the maker uses, with no file ending of its own for a drawn picture', () => {
+    const maker = readFileSync(new URL('../src/ui/Maker.svelte', import.meta.url), 'utf8');
+    expect(maker).toContain('pictureFilename(fileName, blob, type)');
+    expect(maker).not.toMatch(/['"`.](png|webp)['"`]\s*[:)]/);
   });
 });
 

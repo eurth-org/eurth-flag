@@ -18,7 +18,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import type { EurthProfile } from '@eurth/profile';
   import ProfileButtons from '@eurth/profile/ProfileButtons.svelte';
-  import { PICTURE_SIZES, calm, download, fileSlug, playTones, svgToPicture, toast } from '@eurth/style';
+  import { PICTURE_SIZES, calm, download, fileSlug, pictureFilename, playTones, svgToPicture, toast } from '@eurth/style';
   import Icon from '@eurth/style/components/Icon.svelte';
   import ShareButtons from '@eurth/style/components/ShareButtons.svelte';
   import { onMount, untrack } from 'svelte';
@@ -240,7 +240,7 @@
     const width = widths.find((w) => `w${w}` === shape) ?? 1280;
     return { svg: standalone(width), width, height: Math.round((width * size.H) / size.W), suffix: '' };
   });
-  const file = (extension: string) => `${fileSlug(title, 'flag')}${picture.suffix}.${extension}`;
+  const fileName = $derived(`${fileSlug(title, 'flag')}${picture.suffix}`);
   const drawn = (type: 'image/png' | 'image/webp' = 'image/png') => svgToPicture(picture.svg, { width: picture.width, height: picture.height, type, quality: 0.92 });
 
   /*
@@ -257,13 +257,17 @@
   }
 
   function saveSvg() {
-    download(`<?xml version="1.0" encoding="UTF-8"?>\n${picture.svg}\n`, file('svg'), 'image/svg+xml');
+    download(`<?xml version="1.0" encoding="UTF-8"?>\n${picture.svg}\n`, `${fileName}.svg`, 'image/svg+xml');
     hoist();
   }
 
+  // Named for what the browser really made: Safari answers a request for WebP with a PNG.
   async function savePicture(type: 'image/png' | 'image/webp') {
     try {
-      download(await drawn(type), file(type === 'image/png' ? 'png' : 'webp'));
+      const blob = await drawn(type);
+      const made = pictureFilename(fileName, blob, type);
+      download(blob, made.filename);
+      if (made.note) toast(made.note);
       hoist();
     } catch {
       toast('This browser could not make the picture. The SVG download always works.');
