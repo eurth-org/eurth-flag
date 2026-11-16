@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
   import {
     faBorderNone,
     faCheck,
     faCircleCheck,
     faCircleInfo,
+    faCopy,
     faFileExport,
     faMagnet,
     faRedo,
@@ -449,7 +451,7 @@
         </section>
 
         <section class="eu-card" aria-labelledby="export-title">
-          <h2 id="export-title" class="eu-card-title"><Icon icon={faFileExport} /> Share and download</h2>
+          <h2 id="export-title" class="eu-card-title"><Icon icon={faCopy} /> Copy and share</h2>
           <ShareButtons
             url={link}
             {title}
@@ -461,6 +463,12 @@
             said={{ link: 'Link copied: it holds the whole flag.', picture: 'Picture copied.', description: 'Description copied.' }}
             oncopy={hoist}
           />
+          <p class="eu-help">The link holds the whole design: copying it is saving it.</p>
+        </section>
+
+        <!-- Copying and saving are two things, so they are two groups, each under its own heading. -->
+        <section class="eu-card" aria-labelledby="save-title">
+          <h2 id="save-title" class="eu-card-title"><Icon icon={faFileExport} /> Save as a file</h2>
           <div class="eu-row">
             <button type="button" class="eu-btn" data-click="bounce" onclick={saveSvg} data-tip="Sharp at any size: for wikis and print" data-tip-align="start">
               <Line icon={downloaded === 'image/svg+xml' ? lineConfirm : lineDownloadOutline} /> SVG
@@ -472,7 +480,7 @@
               <Line icon={downloaded === 'image/webp' ? lineConfirm : lineDownloadOutline} /> WebP
             </button>
             <button type="button" class="eu-btn" data-click="bounce" onclick={saveMarkdown} data-tip="The flag in words: for the forum and wikis">
-              <Line icon={downloaded === 'text/markdown' ? lineConfirm : lineDownloadOutline} /> Markdown
+              {#if downloaded === 'text/markdown'}<Line icon={lineConfirm} />{:else}<Icon icon={faMarkdown} />{/if} Markdown
             </button>
             <label class="shape">
               <span class="eu-visually-hidden">Picture size</span>
@@ -490,6 +498,7 @@
               </select>
             </label>
           </div>
+          <h3 class="eu-label">Your nation's profile</h3>
           <div class="eu-row">
             <ProfileButtons profile={saved} onload={loaded} onerror={refused} />
           </div>
@@ -502,7 +511,7 @@
             <p class="eu-help">This flag has so many layers that its link is too long for a profile file. The file will carry its picture and description; keep the link as well if you want to change the flag later.</p>
           {/if}
           <p class="eu-help">
-            The flag is yours. The link holds the whole design, and the profile file carries your nation from one Eurth tool to the next. Nothing is kept in this browser or on a server.
+            The flag is yours. The profile file carries your nation from one Eurth tool to the next. Nothing is kept in this browser or on a server.
           </p>
         </section>
       </div>
