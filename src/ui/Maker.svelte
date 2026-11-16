@@ -4,10 +4,7 @@
     faCheck,
     faCircleCheck,
     faCircleInfo,
-    faDice,
-    faDownload,
     faFileExport,
-    faImage,
     faMagnet,
     faRedo,
     faRotateLeft,
@@ -20,10 +17,14 @@
   import ProfileButtons from '@eurth/profile/ProfileButtons.svelte';
   import { PICTURE_SIZES, calm, download, fileSlug, pictureFilename, playTones, svgToPicture, toast } from '@eurth/style';
   import Icon from '@eurth/style/components/Icon.svelte';
+  import Line from '@eurth/style/components/Line.svelte';
+  import RandomButton from '@eurth/style/components/RandomButton.svelte';
   import ShareButtons from '@eurth/style/components/ShareButtons.svelte';
+  import { lineAlert, lineAlertCircle, lineConfirm, lineConfirmCircle, lineDownloadOutline, type LineIcon } from '@eurth/style/line';
   import { onMount, untrack } from 'svelte';
   import { describeFlag } from '../flag/describe';
   import { cleanName, flagData, fromAddress, fromHash, toQuery, type Shared } from '../flag/link';
+  import { flagMarkdown } from '../flag/markdown';
   import { colorsOf, type Flag } from '../flag/model';
   import { pictureSvg } from '../flag/picture';
   import { flagFromProfile, linkFits, withFlag } from '../flag/profile';
@@ -93,6 +94,15 @@
     selected = null;
   }
 
+  /*
+   * Random asks before it rolls over real work, and only then: the flag the page opened with
+   * and a flag Random rolled itself are nobody's work yet, so those roll at once. `settled` is
+   * that flag, as drawn; once the visitor changes it, there is something to lose.
+   */
+  const drawing = $derived(JSON.stringify(flagData(flag)));
+  let settled = $state('');
+  const changed = $derived(ready && drawing !== settled);
+
   function random() {
     const next = randomSimple();
     if (mode === 'simple') simple = { ...next, ratio: simple.ratio };
@@ -101,6 +111,7 @@
       advancedBase = '';
       selected = null;
     }
+    settled = drawing;
   }
 
   function load(shared: Shared) {
@@ -203,6 +214,7 @@
     if (arrived?.old) address(opening);
     showing = !!arrived;
     last = untrack(() => snapshot);
+    settled = untrack(() => drawing);
     ready = true;
 
     // An old link opened on this page (pasted over the address, or followed from a forum post).
@@ -256,9 +268,28 @@
     setTimeout(() => (flying = false), 500);
   }
 
+  // The button just used shows a tick for a moment, as the share row's do. A download is known
+  // by the kind of file that was asked for.
+  type Kind = 'image/svg+xml' | 'image/png' | 'image/webp' | 'text/markdown';
+  let downloaded = $state<Kind | null>(null);
+  let ticking: ReturnType<typeof setTimeout> | undefined;
+  function left(kind: Kind) {
+    downloaded = kind;
+    clearTimeout(ticking);
+    ticking = setTimeout(() => (downloaded = null), 2000);
+    hoist();
+  }
+
   function saveSvg() {
     download(`<?xml version="1.0" encoding="UTF-8"?>\n${picture.svg}\n`, `${fileName}.svg`, 'image/svg+xml');
-    hoist();
+    left('image/svg+xml');
+  }
+
+  // The flag in words, for the forum and wikis: its name, description, design check and link.
+  const markdown = () => flagMarkdown(flag, { heading: cleanedName ? title : '', link, site: siteName });
+  function saveMarkdown() {
+    download(`${markdown()}\n`, `${fileSlug(title, 'flag')}.md`, 'text/markdown');
+    left('text/markdown');
   }
 
   // Named for what the browser really made: Safari answers a request for WebP with a PNG.
@@ -268,7 +299,7 @@
       const made = pictureFilename(fileName, blob, type);
       download(blob, made.filename);
       if (made.note) toast(made.note);
-      hoist();
+      left(type);
     } catch {
       toast('This browser could not make the picture. The SVG download always works.');
     }
@@ -305,6 +336,8 @@
   });
 
   const levelIcon: Record<Level, typeof faCircleCheck> = { good: faCircleCheck, note: faCircleInfo, warn: faTriangleExclamation };
+  // The score's own icon draws itself again whenever the verdict changes.
+  const levelLine: Record<Level, LineIcon> = { good: lineConfirmCircle, note: lineAlertCircle, warn: lineAlert };
   const levelName: Record<Level, string> = { good: 'Good', note: 'Worth a look', warn: 'Problem' };
   const scoreLevel = $derived<Level>(check.score >= 9 ? 'good' : check.score >= 7 ? 'note' : 'warn');
 </script>
@@ -317,24 +350,22 @@
       <legend class="eu-visually-hidden">Mode</legend>
       <label class="eu-pill" data-tip="Four choices: division, overlay, symbol, colours" data-tip-align="start">
         <input type="radio" name="mode" value="simple" checked={mode === 'simple'} onchange={() => setMode('simple')} />
-        <span class="eu-check"><Icon icon={faCheck} /></span>
+        <span class="eu-check">{#if mode === 'simple'}<Line icon={lineConfirm} />{/if}</span>
         <Icon icon={faWandMagicSparkles} /> Simple
       </label>
       <label class="eu-pill" data-tip="Any number of bands and layers, placed by hand" data-tip-align="start">
         <input type="radio" name="mode" value="advanced" checked={mode === 'advanced'} onchange={() => setMode('advanced')} />
-        <span class="eu-check"><Icon icon={faCheck} /></span>
+        <span class="eu-check">{#if mode === 'advanced'}<Line icon={lineConfirm} />{/if}</span>
         <Icon icon={faSliders} /> Advanced
       </label>
     </fieldset>
     <div class="eu-row actions">
       {#if mode === 'advanced' && touched}
-        <button type="button" class="eu-btn" data-click="spin" onclick={startFromSimple} data-tip="Replace this flag with your simple design">
+        <button type="button" class="eu-btn eu-btn--risky" data-click="spin" onclick={startFromSimple} data-tip="Replace this flag with your simple design">
           <Icon icon={faRotateLeft} /> Start from simple
         </button>
       {/if}
-      <button type="button" class="eu-btn" data-click="tumble" onclick={random} data-tip="A random flag that tries to look good">
-        <Icon icon={faDice} /> Random
-      </button>
+      <RandomButton onrandom={random} guard={changed} what="flag" />
       <button type="button" class="eu-btn eu-btn--icon" data-click="swing-left" onclick={undo} disabled={!past.length} aria-label="Undo" data-tip="Undo (Ctrl or ⌘ Z)">
         <Icon icon={faUndo} />
       </button>
@@ -361,7 +392,7 @@
             <input class="eu-input" type="text" maxlength="60" placeholder="Whose flag is it? A country, a city, a cause…" bind:value={name} autocomplete="off" spellcheck="false" />
           </label>
           <a class="eu-btn score {scoreLevel}" href="#check-title" data-tip="Design check: {check.verdict}">
-            <Icon icon={levelIcon[scoreLevel]} />
+            <Line icon={levelLine[scoreLevel]} />
             <span class="eu-visually-hidden">Design check:</span>
             <span class="eu-data">{check.score}/10</span>
           </a>
@@ -392,7 +423,7 @@
         <section class="eu-card" aria-labelledby="check-title">
           <h2 id="check-title" class="fw-heading">
             <Icon icon={faCircleCheck} /> Design check
-            <span class="verdict {scoreLevel}"><Icon icon={levelIcon[scoreLevel]} /> {check.score}/10 · {check.verdict}</span>
+            <span class="verdict {scoreLevel}"><Line icon={levelLine[scoreLevel]} /> {check.score}/10 · {check.verdict}</span>
           </h2>
           <div class="sizes" role="group" aria-label="The flag at small sizes">
             <span class="fw-flag mini" style:width="20px">{@html preview}</span>
@@ -424,6 +455,7 @@
             {title}
             text={`${cleanedName ? `${title}. ` : ''}${description} Made with ${siteName}.`}
             description={() => `${title}. ${description}`}
+            {markdown}
             picture={() => drawn()}
             heading={cleanedName ? `Share ${title.replace(/^Flag of /, 'the flag of ')}` : 'Share your flag'}
             said={{ link: 'Link copied: it holds the whole flag.', picture: 'Picture copied.', description: 'Description copied.' }}
@@ -431,10 +463,17 @@
           />
           <div class="eu-row">
             <button type="button" class="eu-btn" data-click="bounce" onclick={saveSvg} data-tip="Sharp at any size: for wikis and print" data-tip-align="start">
-              <Icon icon={faDownload} /> SVG
+              <Line icon={downloaded === 'image/svg+xml' ? lineConfirm : lineDownloadOutline} /> SVG
             </button>
-            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/png')}><Icon icon={faImage} /> PNG</button>
-            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/webp')}><Icon icon={faImage} /> WebP</button>
+            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/png')}>
+              <Line icon={downloaded === 'image/png' ? lineConfirm : lineDownloadOutline} /> PNG
+            </button>
+            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/webp')}>
+              <Line icon={downloaded === 'image/webp' ? lineConfirm : lineDownloadOutline} /> WebP
+            </button>
+            <button type="button" class="eu-btn" data-click="bounce" onclick={saveMarkdown} data-tip="The flag in words: for the forum and wikis">
+              <Line icon={downloaded === 'text/markdown' ? lineConfirm : lineDownloadOutline} /> Markdown
+            </button>
             <label class="shape">
               <span class="eu-visually-hidden">Picture size</span>
               <select class="eu-select" bind:value={shape}>

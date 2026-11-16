@@ -10,11 +10,12 @@ The rules every Eurth tool follows are in the handbook, [`node_modules/@eurth/st
 
 ## Use
 
-Open the maker and pick a division, an overlay, a symbol and their colours (Simple), or switch to Advanced and place every band and layer by hand. The design check reads the flag the way a vexillologist would. Then:
+Open the maker and pick a division, an overlay, a symbol and their colours (Simple), or switch to Advanced and place every band and layer by hand. **Random** rolls a flag to start from; it asks once before it replaces a flag you have changed. The design check reads the flag the way a vexillologist would. Then:
 
 - **Copy link.** The link holds the whole flag: `?s=1.…` for a simple flag, `?f=1.…` for an advanced one, `&n=` for its name. Copying the link is saving the flag.
 - **Download** it as SVG, PNG or WebP: the flag alone at up to 3840 pixels wide, or on a Night ground in the sizes social sites like (link preview, square, portrait, story, pin, wide).
 - **Copy picture** or **Copy description**, or **Share** it to the Eurth forum and ten other places.
+- **Copy Markdown**, or download it as a `.md` file, for the forum and wikis: the flag's name, its written description, the design check's score and its link.
 - **Save profile** puts the flag into your nation's profile file (`<nation>.eurth.json`), which the other Eurth tools read; **Load profile** brings a nation back, flag and all.
 
 Nothing is stored in the browser: no cookies, no localStorage, no account. Links made before November 2026 kept the design after a `#` (`#s=…`, `#f=…`); they still open the same flag, and the address is then rewritten to today's form.
@@ -40,6 +41,7 @@ Nothing is stored in the browser: no cookies, no localStorage, no account. Links
 | Links: today's query string, the old `#` form, and cleaning what arrives | `src/flag/link.ts` |
 | The flag section of the nation profile | `src/flag/profile.ts` |
 | The written description | `src/flag/describe.ts` |
+| The flag as Markdown | `src/flag/markdown.ts` |
 | The design check and the lookalike list | `src/flag/review.ts` |
 | Random flags | `src/flag/random.ts` |
 | Templates (also the glossary's and sharing image's flags) | `src/flag/templates.ts` |
@@ -47,7 +49,7 @@ Nothing is stored in the browser: no cookies, no localStorage, no account. Links
 | Simple and advanced controls | `src/ui/SimpleControls.svelte`, `src/ui/AdvancedControls.svelte` |
 | The flag on screen: selecting and dragging layers | `src/ui/Stage.svelte` |
 | Flagwright's own pieces of layout (tokens only) | `src/styles/flagwright.css` |
-| Pages: maker, templates, guide, glossary, 404 | `src/pages/` |
+| Pages: maker, templates, guide, glossary, 404 (the written ones built from `@eurth/style`'s `PageHead`, `Figure`, `Note` and `Toc`) | `src/pages/` |
 | The footer's credits | `src/components/Credits.astro` |
 | Icons and the sharing image | `tools/make-images.mjs` (from `src/assets/logo.svg` and the templates) |
 | The checks every tool runs; Flagwright's own | `tests/shell.test.js`; `tests/flag.test.ts` |
@@ -93,7 +95,7 @@ GitHub Actions checks, builds and tests every push and pull request, and deploys
 ## Credits
 
 - Inspired by [Scrontch's Flag Designer](https://scrontch.eu/flags/) by Lars Ruoff and [FlagMaker Jr.](https://andrewsarnold.github.io/FlagMaker-Jr/) by Andrew Arnold. Written from scratch: no code or artwork is taken from either.
-- Icons and emblems by [Font Awesome](https://fontawesome.com) Free (CC BY 4.0); the theme switch's sun and moon by line-md (MIT).
+- Icons and emblems by [Font Awesome](https://fontawesome.com) Free (CC BY 4.0); the icons that draw themselves by line-md (MIT).
 - The design check follows the principles in Ted Kaye's *Good Flag, Bad Flag* (NAVA), in its own words.
 
 ## Licence

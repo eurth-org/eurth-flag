@@ -5,8 +5,9 @@ import { describeFlag } from '../src/flag/describe';
 import { emblems } from '../src/flag/emblems';
 import { createProfile, getSection, parseProfile, serialiseProfile, setSection, validateProfile } from '@eurth/profile';
 import calderwyn from '@eurth/profile/examples/calderwyn.eurth.json';
-import { PICTURE_SIZES, pictureFilename } from '@eurth/style';
+import { PICTURE_SIZES, markdownText, pictureFilename } from '@eurth/style';
 import { advancedLink, cleanFlag, decodeFlag, decodeSimple, encodeFlag, encodeSimple, flagLink, fromAddress, fromHash, fromLink, fromQuery, simpleLink, toQuery } from '../src/flag/link';
+import { flagMarkdown } from '../src/flag/markdown';
 import { colorsOf, defaultFlag, newOverlay, overlayDefs, overlayTypes, type Flag } from '../src/flag/model';
 import { pictureSvg, placeFlag } from '../src/flag/picture';
 import { flagFromProfile, linkFits, withFlag } from '../src/flag/profile';
@@ -304,6 +305,47 @@ describe('description', () => {
     );
     expect(describeFlag(fromSimple(templates.find((t) => t.id === 'nordic-cross')!.simple))).toBe('A teal field, with a white Nordic cross. Proportions 2:3.');
     expect(describeFlag(fromSimple(templates.find((t) => t.id === 'canton')!.simple))).toContain('a maroon canton and a gold sun of sixteen rays in the canton');
+  });
+});
+
+describe('markdown', () => {
+  const nordic = templates.find((t) => t.id === 'nordic-cross')!.simple;
+  const flag = fromSimple(nordic);
+  const link = `https://flag.eurth.org${flagLink({ mode: 'simple', simple: nordic, name: 'Orioni' })}`;
+
+  it('writes the name, the description, the design check and the link that brings the flag back', () => {
+    const check = review(flag);
+    expect(flagMarkdown(flag, { heading: 'Flag of Orioni', link })).toBe(
+      ['## Flag of Orioni', '', 'A teal field, with a white Nordic cross. Proportions 2:3.', '', `**Design check:** ${check.score}/10 · ${check.verdict}`, '', `[Open this flag in Flagwright](${link})`].join('\n'),
+    );
+    // The link in it opens the same flag.
+    const back = /\]\((.+)\)$/.exec(flagMarkdown(flag, { heading: 'Flag of Orioni', link }))![1]!;
+    expect(fromLink(back, ['https://flag.eurth.org'])).toMatchObject({ mode: 'simple', simple: nordic, name: 'Orioni' });
+  });
+  it('has no heading for a flag without a name', () => {
+    const text = flagMarkdown(flag, { link });
+    expect(text.startsWith('A teal field')).toBe(true);
+    expect(text).not.toContain('#');
+    expect(flagMarkdown(flag, { heading: '   ', link })).toBe(text);
+  });
+  it('writes what a visitor typed literally, so a name can\'t turn into markup', () => {
+    const name = 'Flag of **Orioni** [x](https://example.com) <b> # | `';
+    const heading = flagMarkdown(flag, { heading: name, link }).split('\n')[0]!;
+    expect(heading).toBe(`## ${markdownText(name)}`);
+    // Every character Markdown would act on has a backslash in front.
+    expect(heading.slice(3)).not.toMatch(/(?<!\\)[*[\]()<>#|`]/);
+  });
+  it('keeps the link whole inside the brackets', () => {
+    const text = flagMarkdown(flag, { link: 'https://flag.eurth.org/?s=1.x&n=A (b) c' });
+    expect(text.endsWith('](https://flag.eurth.org/?s=1.x&n=A%20%28b%29%20c)')).toBe(true);
+  });
+  it('describes every template, with a score out of ten', () => {
+    for (const t of templates) {
+      const text = flagMarkdown(fromSimple(t.simple), { heading: t.name, link: `https://flag.eurth.org${simpleLink(t.simple)}` });
+      expect(text).toContain(describeFlag(fromSimple(t.simple)));
+      expect(text).toMatch(/\*\*Design check:\*\* (10|[1-9])\/10 · \S/);
+      expect(text).not.toMatch(/undefined|NaN/);
+    }
   });
 });
 

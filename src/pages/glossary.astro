@@ -1,20 +1,30 @@
 ---
 // The words flags are described in, each in a sentence, with a picture where one helps.
 // Each term has an id to link to, and the whole set is given to search engines as a DefinedTermSet.
+// The page is built from the suite's parts for written pages: PageHead, Figure, Toc and eu-terms.
 import { resolveColors } from '@eurth/style';
 import { definedTermSet } from '@eurth/style/build';
+import Figure from '@eurth/style/components/Figure.astro';
+import Line from '@eurth/style/components/Line.astro';
 import Page from '@eurth/style/components/Page.astro';
+import PageHead from '@eurth/style/components/PageHead.astro';
+import Toc from '@eurth/style/components/Toc.astro';
+import { lineEdit } from '@eurth/style/line';
 import tokens from '@eurth/style/tokens.json';
 import { site } from '../../eurth.config.mjs';
 import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
 import { simpleLink } from '../flag/link';
 import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
+import { templates } from '../flag/templates';
 
 // The diagram's labels can't use the stylesheet's custom properties (it is a picture of a flag,
-// the same in both themes), so they take the brand's own pair from the tokens: night on Eurth
-// blue, at the size the handbook asks for.
+// the same in both themes), so they take night from the tokens as a plain value: dark on the
+// flag's light blue field, white on its dark canton.
 const night = resolveColors(tokens, 'dark').night;
+
+// The flag at the head of the page: stripes, a canton and a charge, three of the words below.
+const head = templates.find((t) => t.id === 'canton')!.simple;
 
 const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', colors: ['#0a1f5c', '#ffffff', '#ce1126'], ...changes });
 
@@ -23,6 +33,8 @@ interface Term {
   also?: string;
   text: string;
   show?: Simple;
+  /** What the picture's link is called, where "Open this <term>" wouldn't read well. */
+  open?: string;
 }
 
 const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
@@ -31,12 +43,12 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
     id: 'parts',
     intro: 'A flag is described as it flies from a pole on its left.',
     terms: [
-      { term: 'Field', text: 'The background of a flag: the whole cloth, before anything is put on it. Also called the ground.' },
+      { term: 'Field', text: 'The background of a flag: the whole cloth, before anything is put on it. Also called the ground.', show: s({ division: 'solid', colors: ['#00847e', '#ffffff', '#ffffff'] }) },
       { term: 'Hoist', text: 'The half of the flag nearest the pole, and the edge along it. Symbols often sit here because the hoist stays visible when there is no wind.' },
       { term: 'Fly', text: 'The half furthest from the pole: the part that flaps, frays and is replaced first.' },
       { term: 'Canton', text: 'The upper hoist quarter of a flag, and a rectangle placed there. The place of honour, and the one part that shows on a limp flag.', show: s({ division: 'h7', colors: ['#ce1126', '#ffffff', '#ce1126'], overlay: 'canton', overlayColor: '#0a1f5c' }) },
       { term: 'Charge', text: 'Any figure placed on the field: a star, a cross, an animal. A field with a charge on it is said to be “charged” with it.', show: s({ division: 'solid', symbol: 'star5', symbolColor: '#fcd116', scale: 'l' }) },
-      { term: 'Emblem', text: 'A charge that is a picture of something: a crown, an eagle, a tree. More detailed than a plain shape, so best used large and alone.' },
+      { term: 'Emblem', text: 'A charge that is a picture of something: a crown, an eagle, a tree. More detailed than a plain shape, so best used large and alone.', show: s({ division: 'solid', colors: ['#7b1e2b', '#ffffff', '#ffffff'], symbol: 'e-crown', symbolColor: '#fcd116', scale: 'l' }) },
       { term: 'Proportions', also: 'ratio', text: 'A flag’s height against its width, written height first: 2:3 is two units high and three wide. 2:3 and 1:2 are the most common.' },
       { term: 'Obverse and reverse', text: 'The front of a flag, seen with the hoist on the left, and its back. Most flags are a mirror image on the back, which is one reason lettering fails.' },
     ],
@@ -82,12 +94,12 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
     intro: 'The ideas behind choosing and combining.',
     terms: [
       { term: 'Vexillology', text: 'The study of flags: their history, meaning and design. From the Latin vexillum, a Roman cavalry banner. Someone who studies flags is a vexillologist; someone who designs them, a vexillographer.' },
-      { term: 'Rule of tincture', text: 'Heraldry’s rule of contrast: a light colour (white or yellow, the “metals”) goes on a dark one, or a dark on a light, and never dark on dark or light on light. It is why most flags can be read at a distance.' },
+      { term: 'Rule of tincture', text: 'Heraldry’s rule of contrast: a light colour (white or yellow, the “metals”) goes on a dark one, or a dark on a light, and never dark on dark or light on light. It is why most flags can be read at a distance.', show: s({ division: 'solid', colors: ['#5c2d91', '#ffffff', '#ffffff'], symbol: 'sun', symbolColor: '#fcd116', scale: 'l' }), open: 'Open this example of the rule of tincture in the flag maker' },
       { term: 'Fimbriation', text: 'A narrow edge of a contrasting colour, usually white or yellow, that separates two colours which would otherwise blur together. In advanced mode, lay a slightly thicker copy of a shape beneath it.' },
       { term: 'Counterchanged', text: 'A charge that lies across a division and swaps the colours on each side of it: light where the field is dark, dark where it is light.' },
-      { term: 'Defaced', text: 'A flag with a charge added to an existing design, as a state flag adds arms to the national tricolour. Not an insult: only the technical term.' },
+      { term: 'Defaced', text: 'A flag with a charge added to an existing design, as a state flag adds arms to the national tricolour. Not an insult: only the technical term.', show: s({ division: 'h3', colors: ['#00847e', '#ffffff', '#5c2d91'], symbol: 'e-anchor', symbolColor: '#0a1f5c', scale: 's' }), open: 'Open this defaced flag in the flag maker' },
       { term: 'Civil flag, state flag, ensign', text: 'Many countries have several flags: a plain one anyone may fly (civil), one with arms for the government (state), and versions for ships (ensigns). A rich source of lore for a fictional nation.' },
-      { term: 'Pan-colours', text: 'Sets of colours shared by related nations: Pan-Slavic (white, blue, red), Pan-African (red, yellow, green, sometimes black), Pan-Arab (red, white, green, black). A shared world can have its own.' },
+      { term: 'Pan-colours', text: 'Sets of colours shared by related nations: Pan-Slavic (white, blue, red), Pan-African (red, yellow, green, sometimes black), Pan-Arab (red, white, green, black). A shared world can have its own.', show: s({ division: 'v3', colors: ['#009739', '#fcd116', '#ce1126'] }), open: 'Open these Pan-African colours in the flag maker' },
     ],
   },
 ];
@@ -105,40 +117,37 @@ const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.
   crumbs={[{ name: 'Glossary', path: '/glossary/' }]}
   jsonld={[definedTermSet(site, { name: 'Glossary of flag terms', path: '/glossary/', terms })]}
 >
-  <div class="eu-stack">
-    <header class="eu-prose">
-      <p class="eu-kicker">Glossary</p>
-      <h1>Flag terms explained</h1>
-      <p class="eu-lead">
-        Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean, in plain English. Every picture opens in the{' '}
-        <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the pieces make a good flag.
-      </p>
+  <PageHead site={site} kicker="Glossary" title="Flag terms explained">
+    <Fragment slot="lead">
+      Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean, in plain English. Every picture opens in the{' '}
+      <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the pieces make a good flag.
+    </Fragment>
+    <a slot="art" href={simpleLink(head)} aria-label="Open this flag in the flag maker"><Flag flag={fromSimple(head)} id="g-head" title="A flag with a canton and a charge" /></a>
+  </PageHead>
 
-      <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
-      <figure class="anatomy">
-        <svg viewBox="0 0 640 360" role="img" aria-label="The parts of a flag: the hoist is the half nearest the pole, the fly the half furthest from it, the canton the upper quarter at the hoist; the field is the background and a charge is a figure placed on it.">
-          <rect x="24" y="10" width="10" height="340" rx="5" fill="#f4900c"></rect>
-          <circle cx="29" cy="12" r="9" fill="#ffcc4d"></circle>
-          <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
-          <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
-          <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
-          <path d={`M319 30V320`} stroke={night} stroke-width="2" stroke-dasharray="6 6"></path>
-          <g font-family={tokens.type.families.sans} font-weight="700" font-size="20" fill={night} text-anchor="middle">
-            <text x="176" y="108" fill="#ffffff">Canton</text>
-            <text x="176" y="262">Hoist</text>
-            <text x="462" y="290">Fly</text>
-            <text x="462" y="100">Charge</text>
-            <text x="560" y="58">Field</text>
-          </g>
-        </svg>
-        <figcaption>The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.</figcaption>
-      </figure>
+  <div class="eu-article">
+    <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
+    <Figure caption="The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.">
+      <svg viewBox="0 0 640 360" role="img" aria-label="The parts of a flag: the hoist is the half nearest the pole, the fly the half furthest from it, the canton the upper quarter at the hoist; the field is the background and a charge is a figure placed on it.">
+        <rect x="24" y="10" width="10" height="340" rx="5" fill="#f4900c"></rect>
+        <circle cx="29" cy="12" r="9" fill="#ffcc4d"></circle>
+        <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
+        <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
+        <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
+        <path d={`M319 30V320`} stroke={night} stroke-width="2" stroke-dasharray="6 6"></path>
+        <g font-family={tokens.type.families.sans} font-weight="700" font-size="26" fill={night} text-anchor="middle">
+          <text x="176" y="108" fill="#ffffff">Canton</text>
+          <text x="176" y="262">Hoist</text>
+          <text x="462" y="290">Fly</text>
+          <text x="462" y="100">Charge</text>
+          <text x="560" y="58">Field</text>
+        </g>
+      </svg>
+    </Figure>
+    <Toc items={groups.map((g) => ({ id: g.id, label: g.title }))} heading="Sections" />
+  </div>
 
-      <nav class="jump" aria-label="Sections">
-        {groups.map((g) => <a href={`#${g.id}`}>{g.title}</a>)}
-      </nav>
-    </header>
-
+  <div class="groups">
     {
       groups.map((g) => (
         <section id={g.id} class="eu-stack">
@@ -146,18 +155,20 @@ const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.
             <h2>{g.title}</h2>
             <p>{g.intro}</p>
           </div>
-          <dl class="terms">
+          <dl class="eu-terms">
             {g.terms.map((t) => (
-              <div class="term" id={anchor(t.term)}>
+              <div class="eu-term" id={anchor(t.term)}>
                 <dt>
                   {t.term}
                   {t.also && <span class="also">or {t.also}</span>}
                 </dt>
                 <dd>
                   {t.show && (
-                    <a class="pic" href={simpleLink(t.show)} aria-label={`Open this ${t.term.toLowerCase()} in the flag maker`}>
-                      <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
-                    </a>
+                    <div class="eu-term-art">
+                      <a href={simpleLink(t.show)} aria-label={t.open ?? `Open this ${t.term.toLowerCase()} in the flag maker`}>
+                        <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
+                      </a>
+                    </div>
                   )}
                   <span>{t.text}</span>
                 </dd>
@@ -167,85 +178,30 @@ const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.
         </section>
       ))
     }
+  </div>
 
-    <div class="eu-prose">
-      <p><a class="eu-btn eu-btn--primary" href="/">Make your flag</a></p>
+  <div class="eu-next">
+    <div class="eu-next-words">
       <p>Next: <a href="/guide/">how to design a good flag</a>, or start from a <a href="/templates/">template</a>.</p>
     </div>
+    <a class="eu-btn eu-btn--primary" href="/"><Line icon={lineEdit} /> Make your flag</a>
   </div>
 
   <Credits slot="inspirations" />
 </Page>
 
 <style>
-  .anatomy svg {
-    display: block;
-    width: 100%;
-    max-width: calc(13 * var(--size-target));
-    height: auto;
-  }
-
-  .anatomy figcaption {
-    margin-top: var(--space-2);
-    color: var(--ink-muted);
-    font: var(--type-body-sm);
-  }
-
-  .jump {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-5);
-    font: var(--type-label);
-  }
-
-  .jump a {
-    display: inline-flex;
-    align-items: center;
-    min-width: var(--size-target);
-    min-height: var(--size-target);
-  }
-
-  .terms {
+  /* Room between one group of terms and the next. */
+  .groups {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(7 * var(--size-target))), 1fr));
-    gap: var(--space-4);
-    margin: 0;
+    gap: var(--space-8);
+    margin-top: var(--space-8);
   }
 
-  .term {
-    padding: var(--space-4);
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    background: var(--surface-raised);
-    scroll-margin-top: var(--space-4);
-  }
-
-  /* The term a link pointed at: an edge around it, and the browser has scrolled it into view. */
-  .term:target {
-    border-color: var(--selected);
-    box-shadow: inset 0 0 0 1px var(--selected);
-  }
-
-  .pic {
-    flex: none;
-    width: calc(2 * var(--size-target));
-  }
-
-  dt {
-    font: var(--type-heading);
-  }
-
+  /* A term's other name, said more quietly beside it. */
   .also {
     margin-left: var(--space-1);
     color: var(--ink-muted);
     font: var(--type-note);
-  }
-
-  /* The picture beside the words that explain it. */
-  dd {
-    display: flex;
-    gap: var(--space-3);
-    align-items: start;
-    margin: var(--space-2) 0 0;
   }
 </style>

@@ -18,6 +18,12 @@
   height: 100%;
 }
 
+/* In a frame from @eurth/style (a page's head, a figure, a tile) the frame is the edge. */
+:is(.eu-pagehead-art, .eu-figure-art, .eu-tile-art) .fw-flag {
+  border: 0;
+  border-radius: 0;
+}
+
 /* A panel's heading: an icon, a few words, and sometimes a count or a score at the far end. */
 .fw-heading {
   display: flex;

@@ -1,10 +1,10 @@
 ---
 // The maker, and under it what search engines and newcomers both want: what it is, how to use
 // it, and answers to the usual questions (also given to search engines as structured data).
-import { faBookAtlas, faSwatchbook, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { faqPage, webApplication } from '@eurth/style/build';
-import Fa from '@eurth/style/components/Fa.astro';
+import Line from '@eurth/style/components/Line.astro';
 import Page from '@eurth/style/components/Page.astro';
+import { lineCompass, lineGrid3, lineList } from '@eurth/style/line';
 import { site } from '../../eurth.config.mjs';
 import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
@@ -120,9 +120,9 @@ const picks = templates.slice(0, 6);
         }
       </ul>
       <p class="eu-row">
-        <a class="eu-btn" href="/templates/"><Fa icon={faSwatchbook} /> All {templates.length} templates</a>
-        <a class="eu-btn" href="/guide/"><Fa icon={faWandMagicSparkles} /> How to design a good flag</a>
-        <a class="eu-btn" href="/glossary/"><Fa icon={faBookAtlas} /> Flag terms explained</a>
+        <a class="eu-btn" href="/templates/"><Line icon={lineGrid3} /> All {templates.length} templates</a>
+        <a class="eu-btn" href="/guide/"><Line icon={lineCompass} /> How to design a good flag</a>
+        <a class="eu-btn" href="/glossary/"><Line icon={lineList} /> Flag terms explained</a>
       </p>
     </section>
 

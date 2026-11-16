@@ -1,7 +1,11 @@
 ---
 // The classic flag layouts, each drawn at build time and opening in the maker with one click.
 // The links are made with the same code the maker reads them with, so they can never drift apart.
+// The page is built from the suite's parts for written pages: PageHead and a gallery of tiles.
+import Line from '@eurth/style/components/Line.astro';
 import Page from '@eurth/style/components/Page.astro';
+import PageHead from '@eurth/style/components/PageHead.astro';
+import { lineArrowRight } from '@eurth/style/line';
 import { site } from '../../eurth.config.mjs';
 import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
@@ -9,6 +13,9 @@ import { describeFlag } from '../flag/describe';
 import { simpleLink } from '../flag/link';
 import { fromSimple } from '../flag/simple';
 import { templates } from '../flag/templates';
+
+// The flag at the head of the page: one of the layouts below.
+const head = templates.find((t) => t.id === 'hoist-triangle')!;
 ---
 
 <Page
@@ -17,57 +24,36 @@ import { templates } from '../flag/templates';
   description="Free flag templates: tricolour, Nordic cross, saltire, canton, hoist triangle, pall and more. Open one in the flag maker, change its colours and symbol, and make it yours."
   crumbs={[{ name: 'Templates', path: '/templates/' }]}
 >
-  <div class="eu-stack">
-    <header class="eu-prose">
-      <p class="eu-kicker">Templates</p>
-      <h1>Flag templates: the classic layouts</h1>
-      <p class="eu-lead">
-        Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what you have in mind, open it in the{' '}
-        <a href="/">maker</a> and make it yours. The <a href="/guide/">guide</a> says what makes a flag good; the <a href="/glossary/">glossary</a> has the words.
-      </p>
-    </header>
-    <ul class="gallery">
-      {
-        templates.map((t) => {
-          const flag = fromSimple(t.simple);
-          return (
-            <li id={t.id}>
-              <a class="eu-card" href={simpleLink(t.simple)}>
+  <PageHead site={site} kicker="Templates" title="Flag templates: the classic layouts">
+    <Fragment slot="lead">
+      Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what you have in mind, open it in the{' '}
+      <a href="/">maker</a> and make it yours. The <a href="/guide/">guide</a> says what makes a flag good; the <a href="/glossary/">glossary</a> has the words.
+    </Fragment>
+    <a slot="art" href={simpleLink(head.simple)} aria-label="Open this flag in the maker"><Flag flag={fromSimple(head.simple)} id="tpl-head" title={head.name} /></a>
+  </PageHead>
+
+  <ul class="eu-gallery">
+    {
+      templates.map((t) => {
+        const flag = fromSimple(t.simple);
+        return (
+          <li id={t.id}>
+            <a class="eu-tile" href={simpleLink(t.simple)}>
+              <div class="eu-tile-art">
                 <Flag flag={flag} id={`tpl-${t.id}`} />
+              </div>
+              <div class="eu-tile-words">
                 <h2>{t.name}</h2>
                 <p>{t.about}</p>
                 <p class="eu-help">{describeFlag(flag)}</p>
-              </a>
-            </li>
-          );
-        })
-      }
-    </ul>
-  </div>
+                <span class="eu-tile-go">Open in the maker <Line icon={lineArrowRight} /></span>
+              </div>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
 
   <Credits slot="inspirations" />
 </Page>
-
-<style>
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(6 * var(--size-target)), 1fr));
-    gap: var(--space-4);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .gallery li {
-    display: flex;
-    scroll-margin-top: var(--space-4);
-  }
-
-  .gallery .eu-card {
-    flex: 1;
-  }
-
-  .gallery h2 {
-    font: var(--type-heading);
-  }
-</style>
