@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { niceWatcher } from '@eurth/style';
+
   // A number as a slider with its value beside it, editable either way.
   let {
     value,
@@ -12,15 +14,21 @@
 
   const fill = $derived(Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)));
 
+  let range: HTMLInputElement | undefined = $state();
+
   function set(raw: string) {
     const n = Number(raw);
     if (raw !== '' && Number.isFinite(n)) onchange(n);
   }
+
+  // The suite's wink: "Nice." when a number settles on 69.
+  const watch = niceWatcher();
+  $effect(() => watch(value, () => range));
 </script>
 
 <label class="slider">
   <span class="name">{label}</span>
-  <input class="range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
+  <input bind:this={range} class="range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
   <span class="number">
     <input type="number" {step} {value} aria-label="{label}{unit ? ` (${unit})` : ''}" onchange={(e) => set(e.currentTarget.value)} />
     <span class="unit" aria-hidden="true">{unit}</span>

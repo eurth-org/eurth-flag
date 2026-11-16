@@ -1,3 +1,5 @@
+# Check, build and test on every push and pull request; axe and Lighthouse on main; deploy main
+# once the door has opened. All of it lives in @eurth/style, so every tool stays in step.
 name: CI
 
 on:
@@ -6,39 +8,6 @@ on:
   pull_request:
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          # No npm cache: Flagwright keeps nothing stored on GitHub beyond the code.
-          package-manager-cache: false
-      - run: npm ci
-      - run: npm run check
-      - run: npm run build
-      # After the build, so the tests also check the built pages against the security headers.
-      - run: npm test
-
-  # Every push to main that passes the checks goes live on flag.eurth.org.
-  deploy:
-    needs: check
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    concurrency: deploy
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - run: npm ci
-      - name: Deploy to flag.eurth.org
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        run: npm run deploy
-      - name: Skip without a token
-        if: env.CLOUDFLARE_API_TOKEN == ''
-        run: echo "::warning::No CLOUDFLARE_API_TOKEN secret, so nothing was deployed. See README, Deployment."
+  ci:
+    uses: eurth-org/eurth-style/.github/workflows/tool-ci.yml@v1
+    secrets: inherit

@@ -1,29 +1,16 @@
-/** Small shared behaviours: a toast, and buttons whose icons act out their click (app.css). */
-const calm = (): boolean => matchMedia('(prefers-reduced-motion: reduce)').matches;
+/**
+ * Flagwright's own buttons answer a click with a small movement: they press in (app.css), and
+ * their icon does what the button says (data-click names it: spin-back, tumble, bounce,
+ * swing-left, swing-right, pop). Installed once for the page (layouts/Base.astro). The suite's
+ * shell does the same for its own buttons, and hides tooltips on Escape for both. Nothing moves
+ * for reduced motion or when motion is switched off in the footer (calm()).
+ */
+import { calm } from '@eurth/style';
 
-/** A short message at the bottom of the screen, also read out by screen readers. */
-export function toast(text: string) {
-  document.querySelector('.toast')?.remove();
-  const note = document.createElement('div');
-  note.className = 'toast';
-  note.setAttribute('role', 'status');
-  note.textContent = text;
-  document.body.append(note);
-  setTimeout(() => note.classList.add('leaving'), 2400);
-  setTimeout(() => note.remove(), 2900);
-}
-
-/** Installed once for the whole page: Escape hides tooltips, and clicked buttons animate. */
 export function clickDelights() {
-  const root = document.documentElement;
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') root.classList.add('tips-hidden');
-  });
-  document.addEventListener('pointermove', () => root.classList.remove('tips-hidden'), { passive: true });
-
   document.addEventListener('click', (event) => {
     if (calm()) return;
-    const button = (event.target as Element | null)?.closest<HTMLElement>('.btn, .pill');
+    const button = (event.target as Element | null)?.closest<HTMLElement>('.fw .btn, .fw .pill');
     if (!button || button.matches(':disabled')) return;
     button.classList.remove('clicked');
     void button.offsetWidth;

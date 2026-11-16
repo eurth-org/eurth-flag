@@ -1,22 +1,12 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
+import eurth from '@eurth/style/astro';
+import { defineConfig } from 'astro/config';
+import { site } from './eurth.config.mjs';
 
+// eurth(site) sets the site up as the handbook asks (static output, addresses ending in a
+// slash, the stylesheet inside each page, scripts as separate files, a sitemap) and after the
+// build writes the security headers, the service worker, the web manifest, robots.txt and llms.txt.
 export default defineConfig({
-  site: 'https://flag.eurth.org',
-  output: 'static',
-  trailingSlash: 'always',
-  // The stylesheet goes inside each page: the first paint needs one download instead of two.
-  build: { inlineStylesheets: 'always' },
-  // Scripts stay separate files, so the Content-Security-Policy can allow only the site's own.
-  vite: { build: { assetsInlineLimit: 0 } },
-  integrations: [
-    svelte(),
-    sitemap({
-      filter: (page) => !/\/404\/?$/.test(page),
-      changefreq: 'monthly',
-      lastmod: new Date(),
-    }),
-  ],
+  integrations: [svelte(), eurth(site)],
 });

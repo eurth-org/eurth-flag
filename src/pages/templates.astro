@@ -1,12 +1,13 @@
 ---
 // The classic flag layouts, each drawn at build time and opening in the maker with one click.
+// The links are made with the same code the maker reads them with, so they can never drift apart.
+import { site } from '../../eurth.config.mjs';
 import Flag from '../components/Flag.astro';
 import { describeFlag } from '../flag/describe';
-import { encodeSimple } from '../flag/link';
+import { simpleLink } from '../flag/link';
 import { fromSimple } from '../flag/simple';
 import { templates } from '../flag/templates';
 import Base from '../layouts/Base.astro';
-import { site } from '../lib/site';
 
 const jsonld = [
   {
@@ -22,8 +23,8 @@ const jsonld = [
 
 <Base
   title={`Flag templates: ${templates.length} classic layouts to start from`}
-  description="Free flag templates: tricolour, Nordic cross, saltire, canton, hoist triangle, pall and more. Open any of them in the flag maker, change the colours and symbols, and download it as SVG or PNG."
-  crumb="Templates"
+  description="Free flag templates: tricolour, Nordic cross, saltire, canton, hoist triangle, pall and more. Open one in the flag maker, change its colours and symbol, and make it yours."
+  crumb={{ name: 'Templates', path: '/templates/' }}
   jsonld={jsonld}
 >
   <div class="page">
@@ -32,7 +33,8 @@ const jsonld = [
       <h1>Flag templates: the classic layouts</h1>
       <p class="lede">
         Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what
-        you have in mind and make it yours.
+        you have in mind, open it in the <a href="/">maker</a> and make it yours. The <a href="/guide/">guide</a> says what
+        makes a flag good; the <a href="/glossary/">glossary</a> has the words.
       </p>
     </div>
     <ul class="gallery">
@@ -41,13 +43,13 @@ const jsonld = [
           const flag = fromSimple(t.simple);
           return (
             <li id={t.id}>
-              <a href={`/#s=${encodeSimple(t.simple)}`} aria-label={`Open the ${t.name.toLowerCase()} template in the flag maker`}>
+              <a href={simpleLink(t.simple)} aria-label={`Open the ${t.name.toLowerCase()} template in the flag maker`}>
                 <Flag flag={flag} id={`tpl-${t.id}`} title={t.name} />
               </a>
               <h2>{t.name}</h2>
               <p>{t.about}</p>
               <p class="blazon">{describeFlag(flag)}</p>
-              <p><a href={`/#s=${encodeSimple(t.simple)}`}>Open in the maker</a></p>
+              <p><a href={simpleLink(t.simple)}>Open in the maker</a></p>
             </li>
           );
         })

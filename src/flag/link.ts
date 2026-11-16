@@ -1,9 +1,19 @@
 /**
- * A flag lives in its link: everything after the # describes it, so sharing a flag is sharing a
- * link, and nothing is kept on a server. Simple flags get a short, readable form
- * (#s=h3_ce1126_ffffff_0038a8_…); advanced flags are compact JSON in base64url (#f=…).
+ * A flag lives in its link: the query string describes it, so sharing a flag is sharing a link,
+ * and nothing is kept on a server or in the browser. Each form carries its version in front, so
+ * a link made today still opens after the tool has grown:
+ *
+ *   ?s=1.h3_ce1126_ffffff_0038a8_…   a simple flag, short and readable
+ *   ?f=1.eyJyYXRpbyI6WzIsM10…        an advanced flag: compact JSON in base64url
+ *   &n=Orioni                        its name, if it has one
+ *
+ * Until November 2026 the design sat after the # instead, without a version (#s=…, #f=…). Those
+ * links are all over the forum, so they are read for good: fromAddress() says when it met one,
+ * and the maker then rewrites the address to today's form.
+ *
  * Whatever arrives is checked and clamped before it is drawn: a link is someone else's input.
  */
+import { decodeState, encodeState } from '@eurth/style';
 import { cleanColor } from './colors';
 import { emblem } from './emblems';
 import { overlayDef, overlayTypes, uid, type Division, type Flag, type Overlay, type OverlayType } from './model';
@@ -121,17 +131,11 @@ export function cleanFlag(value: unknown): Flag {
   return { ratio: cleanRatio(o.ratio), division: cleanDivision(o.division), overlays };
 }
 
-const toBase64Url = (text: string): string => {
-  const bytes = new TextEncoder().encode(text);
-  let bin = '';
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-};
+/** The version written in front of both forms. Raise it when a form changes shape, and keep reading the old ones. */
+export const LINK_VERSION = 1;
 
-const fromBase64Url = (text: string): string => {
-  const bin = atob(text.replace(/-/g, '+').replace(/_/g, '/'));
-  return new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)));
-};
+/** The longest link text read: room for 60 layers, and no more. */
+const MAX_LENGTH = 40_000;
 
 /** The flag without what only the editor needs (layer ids), with short numbers. */
 export function flagData(flag: Flag): unknown {
@@ -142,16 +146,29 @@ export function flagData(flag: Flag): unknown {
   };
 }
 
+/** An advanced flag as the value of ?f=: "1." and compact JSON in base64url. */
 export function encodeFlag(flag: Flag): string {
-  return toBase64Url(JSON.stringify(flagData(flag)));
+  return encodeState(flagData(flag), LINK_VERSION);
 }
 
+/** Reads ?f= back. An old link's #f= had no version in front: the same JSON, read as version 1. */
 export function decodeFlag(text: string): Flag | null {
-  try {
-    return cleanFlag(JSON.parse(fromBase64Url(text)));
-  } catch {
-    return null;
-  }
+  const state = decodeState(/^\d{1,4}\./.test(text) ? text : `${LINK_VERSION}.${text}`, { maxLength: MAX_LENGTH });
+  if (!state || state.version !== LINK_VERSION || typeof state.value !== 'object' || state.value === null) return null;
+  return cleanFlag(state.value);
+}
+
+/** A simple flag as the value of ?s=: "1." and the readable form. */
+export function encodeSimpleState(simple: Simple): string {
+  return `${LINK_VERSION}.${encodeSimple(simple)}`;
+}
+
+/** Reads ?s= back. An old link's #s= had no version in front: the same form, read as version 1. */
+export function decodeSimpleState(text: string): Simple | null {
+  if (text.length > MAX_LENGTH) return null;
+  const found = /^(\d{1,4})\.(.*)$/.exec(text);
+  if (found && Number(found[1]) !== LINK_VERSION) return null;
+  return decodeSimple(found ? found[2]! : text);
 }
 
 export interface Shared {
@@ -161,19 +178,34 @@ export interface Shared {
   name: string;
 }
 
-/** The part of a link after the #, for a flag in either mode. */
-export function toHash(shared: Shared): string {
-  const design = shared.mode === 'simple' && shared.simple ? `s=${encodeSimple(shared.simple)}` : `f=${encodeFlag(shared.flag!)}`;
+/** A link's query string (without the ?), for a flag in either mode. */
+export function toQuery(shared: Shared): string {
+  const params = new URLSearchParams();
+  if (shared.mode === 'simple' && shared.simple) params.set('s', encodeSimpleState(shared.simple));
+  else params.set('f', encodeFlag(shared.flag!));
   const name = cleanName(shared.name).trim();
-  return name ? `${design}&n=${encodeURIComponent(name)}` : design;
+  if (name) params.set('n', name);
+  return params.toString();
 }
 
-export function fromHash(hash: string): Shared | null {
-  const params = new URLSearchParams(hash.replace(/^#/, ''));
+/** The address that opens a flag in the maker: "/?s=1.…" on this site, or a whole link with a base. */
+export function flagLink(shared: Shared, base = ''): string {
+  return `${base.replace(/\/$/, '')}/?${toQuery(shared)}`;
+}
+
+/** A simple design's address in the maker, for the pages that link into it. */
+export const simpleLink = (simple: Simple): string => flagLink({ mode: 'simple', simple, name: '' });
+
+/** An advanced flag's address in the maker. */
+export const advancedLink = (flag: Flag): string => flagLink({ mode: 'advanced', flag, name: '' });
+
+function fromParams(text: string): Shared | null {
+  if (text.length > MAX_LENGTH) return null;
+  const params = new URLSearchParams(text);
   const name = cleanName(params.get('n') ?? '');
   const s = params.get('s');
   if (s) {
-    const simple = decodeSimple(s);
+    const simple = decodeSimpleState(s);
     if (simple) return { mode: 'simple', simple, name };
   }
   const f = params.get('f');
@@ -182,4 +214,41 @@ export function fromHash(hash: string): Shared | null {
     if (flag) return { mode: 'advanced', flag, name };
   }
   return null;
+}
+
+/** The flag in a link's query string ("?s=1.…"), or null if there is none to read. */
+export function fromQuery(search: string): Shared | null {
+  return fromParams(search.replace(/^\?/, ''));
+}
+
+/** The flag in an old link's # part ("#s=…", "#f=…"), or null. */
+export function fromHash(hash: string): Shared | null {
+  return fromParams(hash.replace(/^#/, ''));
+}
+
+/**
+ * The flag an address holds: today's query string first, then an old link's # part. `old` says
+ * the flag came from the # part, so the address can be rewritten to today's form.
+ */
+export function fromAddress(search: string, hash: string): { shared: Shared; old: boolean } | null {
+  const now = fromQuery(search);
+  if (now) return { shared: now, old: false };
+  const then = fromHash(hash);
+  return then ? { shared: then, old: true } : null;
+}
+
+/**
+ * The flag a whole link holds, if the link is one of ours: `origins` lists the addresses that
+ * count as this site ("https://flag.eurth.org"). Anything else is null: a profile file's link
+ * may point anywhere, and only our own is opened.
+ */
+export function fromLink(link: unknown, origins: readonly string[]): Shared | null {
+  if (typeof link !== 'string' || link.length > MAX_LENGTH) return null;
+  try {
+    const url = new URL(link);
+    if (!origins.some((origin) => new URL(origin).origin === url.origin)) return null;
+    return fromAddress(url.search, url.hash)?.shared ?? null;
+  } catch {
+    return null;
+  }
 }

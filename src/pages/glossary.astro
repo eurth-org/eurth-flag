@@ -1,10 +1,12 @@
 ---
 // The words flags are described in, each in a sentence, with a picture where one helps.
+// Each term has an id to link to, and the whole set is given to search engines as a DefinedTermSet.
+import { definedTermSet } from '@eurth/style/build';
+import { site } from '../../eurth.config.mjs';
 import Flag from '../components/Flag.astro';
-import { encodeSimple } from '../flag/link';
+import { simpleLink } from '../flag/link';
 import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
 import Base from '../layouts/Base.astro';
-import { site } from '../lib/site';
 
 const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', colors: ['#0a1f5c', '#ffffff', '#ce1126'], ...changes });
 
@@ -13,6 +15,8 @@ interface Term {
   also?: string;
   text: string;
   show?: Simple;
+  /** What the picture's link is called, where "Open this <term>" wouldn't read well. */
+  open?: string;
 }
 
 const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
@@ -21,12 +25,12 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
     id: 'parts',
     intro: 'A flag is described as it flies from a pole on its left.',
     terms: [
-      { term: 'Field', text: 'The background of a flag: the whole cloth, before anything is put on it. Also called the ground.' },
+      { term: 'Field', text: 'The background of a flag: the whole cloth, before anything is put on it. Also called the ground.', show: s({ division: 'solid', colors: ['#00847e', '#ffffff', '#ffffff'] }) },
       { term: 'Hoist', text: 'The half of the flag nearest the pole, and the edge along it. Symbols often sit here because the hoist stays visible when there is no wind.' },
       { term: 'Fly', text: 'The half furthest from the pole: the part that flaps, frays and is replaced first.' },
       { term: 'Canton', text: 'The upper hoist quarter of a flag, and a rectangle placed there. The place of honour, and the one part that shows on a limp flag.', show: s({ division: 'h7', colors: ['#ce1126', '#ffffff', '#ce1126'], overlay: 'canton', overlayColor: '#0a1f5c' }) },
       { term: 'Charge', text: 'Any figure placed on the field: a star, a cross, an animal. A field with a charge on it is said to be “charged” with it.', show: s({ division: 'solid', symbol: 'star5', symbolColor: '#fcd116', scale: 'l' }) },
-      { term: 'Emblem', text: 'A charge that is a picture of something: a crown, an eagle, a tree. More detailed than a plain shape, so best used large and alone.' },
+      { term: 'Emblem', text: 'A charge that is a picture of something: a crown, an eagle, a tree. More detailed than a plain shape, so best used large and alone.', show: s({ division: 'solid', colors: ['#7b1e2b', '#ffffff', '#ffffff'], symbol: 'e-crown', symbolColor: '#fcd116', scale: 'l' }) },
       { term: 'Proportions', also: 'ratio', text: 'A flag’s height against its width, written height first: 2:3 is two units high and three wide. 2:3 and 1:2 are the most common.' },
       { term: 'Obverse and reverse', text: 'The front of a flag, seen with the hoist on the left, and its back. Most flags are a mirror image on the back, which is one reason lettering fails.' },
     ],
@@ -72,41 +76,26 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
     intro: 'The ideas behind choosing and combining.',
     terms: [
       { term: 'Vexillology', text: 'The study of flags: their history, meaning and design. From the Latin vexillum, a Roman cavalry banner. Someone who studies flags is a vexillologist; someone who designs them, a vexillographer.' },
-      { term: 'Rule of tincture', text: 'Heraldry’s rule of contrast: a light colour (white or yellow, the “metals”) goes on a dark one, or a dark on a light, and never dark on dark or light on light. It is why most flags can be read at a distance.' },
+      { term: 'Rule of tincture', text: 'Heraldry’s rule of contrast: a light colour (white or yellow, the “metals”) goes on a dark one, or a dark on a light, and never dark on dark or light on light. It is why most flags can be read at a distance.', show: s({ division: 'solid', colors: ['#5c2d91', '#ffffff', '#ffffff'], symbol: 'sun', symbolColor: '#fcd116', scale: 'l' }), open: 'Open this example of the rule of tincture in the flag maker' },
       { term: 'Fimbriation', text: 'A narrow edge of a contrasting colour, usually white or yellow, that separates two colours which would otherwise blur together. In advanced mode, lay a slightly thicker copy of a shape beneath it.' },
       { term: 'Counterchanged', text: 'A charge that lies across a division and swaps the colours on each side of it: light where the field is dark, dark where it is light.' },
-      { term: 'Defaced', text: 'A flag with a charge added to an existing design, as a state flag adds arms to the national tricolour. Not an insult: only the technical term.' },
+      { term: 'Defaced', text: 'A flag with a charge added to an existing design, as a state flag adds arms to the national tricolour. Not an insult: only the technical term.', show: s({ division: 'h3', colors: ['#00847e', '#ffffff', '#5c2d91'], symbol: 'e-anchor', symbolColor: '#0a1f5c', scale: 's' }), open: 'Open this defaced flag in the flag maker' },
       { term: 'Civil flag, state flag, ensign', text: 'Many countries have several flags: a plain one anyone may fly (civil), one with arms for the government (state), and versions for ships (ensigns). A rich source of lore for a fictional nation.' },
-      { term: 'Pan-colours', text: 'Sets of colours shared by related nations: Pan-Slavic (white, blue, red), Pan-African (red, yellow, green, sometimes black), Pan-Arab (red, white, green, black). A shared world can have its own.' },
+      { term: 'Pan-colours', text: 'Sets of colours shared by related nations: Pan-Slavic (white, blue, red), Pan-African (red, yellow, green, sometimes black), Pan-Arab (red, white, green, black). A shared world can have its own.', show: s({ division: 'v3', colors: ['#009739', '#fcd116', '#ce1126'] }), open: 'Open these Pan-African colours in the flag maker' },
     ],
   },
 ];
 
 const all = groups.flatMap((g) => g.terms);
 const anchor = (term: string) => term.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
-const jsonld = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'DefinedTermSet',
-    '@id': `${site.url}/glossary/`,
-    name: 'Glossary of flag terms',
-    description: 'The vocabulary of vexillology, in plain English.',
-    hasDefinedTerm: all.map((t) => ({
-      '@type': 'DefinedTerm',
-      name: t.term,
-      ...(t.also ? { alternateName: t.also } : {}),
-      description: t.text,
-      url: `${site.url}/glossary/#${anchor(t.term)}`,
-    })),
-  },
-];
+const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.text }));
 ---
 
 <Base
   title={`Flag terms explained: a glossary of ${all.length} vexillology words`}
-  description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of vexillology for worldbuilders."
-  crumb="Glossary"
-  jsonld={jsonld}
+  description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of flag terms for worldbuilders."
+  crumb={{ name: 'Glossary', path: '/glossary/' }}
+  jsonld={[definedTermSet(site, { name: 'Glossary of flag terms', path: '/glossary/', terms })]}
 >
   <div class="page">
     <p class="crumbs"><a href="/">Flag maker</a> › Glossary</p>
@@ -114,7 +103,8 @@ const jsonld = [
       <h1>Flag terms explained</h1>
       <p class="lede">
         Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean,
-        in plain English. Every picture opens in the maker.
+        in plain English. Every picture opens in the <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the
+        pieces make a good flag.
       </p>
 
       <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
@@ -149,21 +139,19 @@ const jsonld = [
             <h2>{g.title}</h2>
             <p>{g.intro}</p>
           </div>
+          <!-- Each term and its definition, as a list of definitions wants them: the picture is
+               part of the definition and is set to the left of both (see .pic below). -->
           <dl class="terms">
             {g.terms.map((t) => (
-              <div class="term" id={anchor(t.term)}>
-                {t.show && (
-                  <a class="pic" href={`/#s=${encodeSimple(t.show)}`} aria-label={`Open this ${t.term.toLowerCase()} in the flag maker`}>
-                    <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
-                  </a>
-                )}
-                <div>
-                  <dt>
-                    {t.term}
-                    {t.also && <span class="also">or {t.also}</span>}
-                  </dt>
-                  <dd>{t.text}</dd>
-                </div>
+              <div class:list={['term', t.show && 'pictured']} id={anchor(t.term)}>
+                <dt>{t.term}{t.also && <span class="also">or {t.also}</span>}</dt>
+                <dd>
+                  {t.show && (
+                    <a class="pic" href={simpleLink(t.show)} aria-label={t.open ?? `Open this ${t.term.toLowerCase()} in the flag maker`}>
+                      <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
+                    </a>
+                  )}{' '}{t.text}
+                </dd>
               </div>
             ))}
           </dl>
@@ -210,10 +198,11 @@ const jsonld = [
     margin: var(--space-3) 0 0;
   }
 
+  /* The card looks as it always did: the picture on the left, the words beside it. The picture
+     now sits inside the definition (a list of definitions may hold nothing but terms and
+     definitions), so it is placed by hand where the row used to put it. */
   .term {
-    display: flex;
-    gap: var(--space-3);
-    align-items: start;
+    position: relative;
     padding: var(--space-3);
     border: 1px solid var(--line);
     border-radius: var(--radius-panel);
@@ -226,10 +215,17 @@ const jsonld = [
     box-shadow: 0 0 0 1px var(--selected);
   }
 
+  /* Room for the picture (84px, and the gap), and for its height where the words are shorter. */
+  .term.pictured {
+    min-height: calc(3px + 56px + 2 * var(--space-3) + 2px);
+    padding-left: calc(var(--space-3) + 84px + var(--space-3));
+  }
+
   .pic {
-    flex: none;
+    position: absolute;
+    top: calc(var(--space-3) + 3px);
+    left: var(--space-3);
     width: 84px;
-    margin-top: 3px;
   }
 
   dt {

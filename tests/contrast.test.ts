@@ -2,6 +2,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
+// Flagwright's own colours (src/styles/app.css, on the .fw wrapper), held to WCAG 2.2 AA. The
+// suite's colours, in the header and footer, are checked by tests/shell.test.js.
 const css = readFileSync('src/styles/app.css', 'utf8');
 
 /** The custom properties declared in one block of app.css, as written. */
@@ -33,8 +35,8 @@ function contrast(a: string, b: string): number {
   return (hi! + 0.05) / (lo! + 0.05);
 }
 
-const light = resolved(declared(css, ':root'));
-const dark = resolved({ ...declared(css, ':root'), ...declared(css, ":root[data-theme='dark']") });
+const light = resolved(declared(css, '.fw'));
+const dark = resolved({ ...declared(css, '.fw'), ...declared(css, ":root[data-theme='dark'] .fw") });
 
 // [foreground, background, minimum]: 4.5 for text, 3 for icons, borders and focus rings.
 const pairs: [string, string, number][] = [
@@ -63,18 +65,15 @@ const pairs: [string, string, number][] = [
 ];
 
 it('uses the same dark colours with and without the theme switch', () => {
-  expect(declared(css, ':root:not([data-theme])')).toEqual(declared(css, ":root[data-theme='dark']"));
+  expect(declared(css, ':root:not([data-theme]) .fw')).toEqual(declared(css, ":root[data-theme='dark'] .fw"));
 });
 
 /*
  * Brand exceptions, decided knowingly for Governmint and kept here: Eurth blue buttons and selected
- * options with white text, and the reverse for the top bar's links. Kept here so the actual ratios stay visible and
- * can't slip further.
+ * options with white text. Kept here so the actual ratios stay visible and can't slip further.
  */
 const exceptions: [string, string, number][] = [
   ['on-selected', 'selected', 3.2],
-  // The top bar's links: white pills with Eurth blue text.
-  ['eurth-blue', 'on-selected', 3.2],
   ['selected', 'surface', 3.2],
   ['selected', 'surface-raised', 2.9],
 ];
