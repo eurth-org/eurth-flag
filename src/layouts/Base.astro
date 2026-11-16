@@ -24,19 +24,10 @@ const { title, description, jsonld = [], noindex = false, crumb } = Astro.props;
 ---
 
 <Page site={site} title={title} description={description} crumbs={crumb ? [crumb] : undefined} jsonld={jsonld} noindex={noindex}>
+  <!-- Flagwright's own mark in front of its name, in the suite's header: the flag with the Eurth
+       yurt on it. It catches the wind when the name is pointed at (styles/site.css). -->
+  <Fragment slot="mark" set:html={logo} />
   <div class="fw">
-    <!-- Flagwright's own row. The name and the tagline are in the suite's header now, so the
-         flag and the Preview badge stand here on their own. -->
-    <div class="header">
-      <div class="bar">
-        <div class="brand">
-          <!-- Like any site's logo, this one goes home: a fresh flag. -->
-          <a class="home" href="/" title="Flagwright: start afresh" aria-label="Flagwright: start afresh"><span class="logo" set:html={logo} /></a>
-          <span class="badge">Preview</span>
-        </div>
-      </div>
-    </div>
-
     <slot />
   </div>
 
