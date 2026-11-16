@@ -7,6 +7,12 @@
   "engines": {
     "node": ">=22"
   },
+  "eurth": {
+    "axe": {
+      "level": "aa",
+      "targets": 24
+    }
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

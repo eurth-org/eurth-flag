@@ -1,38 +1,49 @@
 ---
 // Flagwright's 404: no flag flies here.
-import Page from '@eurth/style/components/Page.astro';
-import { site } from '../../eurth.config.mjs';
-import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
 import type { Flag as FlagData } from '../flag/model';
+import Base from '../layouts/Base.astro';
 
 // A white flag: the page surrenders.
 const white: FlagData = { ratio: [2, 3], division: { type: 'bands', dir: 'h', bands: [{ color: '#ffffff', weight: 1 }] }, overlays: [] };
 ---
 
-<Page site={site} title="Unclaimed territory" description="This page doesn't exist. No flag has been planted here yet: the maker, the templates, the guide and the glossary are elsewhere." noindex>
-  <div class="eu-stack lost">
+<Base title="Unclaimed territory" description="This page doesn't exist. No flag has been planted here yet: the maker, the templates, the guide and the glossary are elsewhere." noindex>
+  <div class="page lost">
     <div class="white"><Flag flag={white} id="white" title="A plain white flag" /></div>
     <h1>Unclaimed territory</h1>
-    <p class="eu-lead">No flag has been planted on this page. We surrender: it doesn't exist, or it moved.</p>
-    <p><a class="eu-btn eu-btn--primary" href="/">Plant a flag</a></p>
+    <p>No flag has been planted on this page. We surrender: it doesn't exist, or it moved.</p>
+    <p><a class="btn btn-primary cta" href="/">Plant a flag</a></p>
   </div>
-
-  <Credits slot="inspirations" />
-</Page>
+</Base>
 
 <style>
   .lost {
-    align-items: center;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
     padding-block: var(--space-8);
     text-align: center;
   }
 
+  .lost h1 {
+    margin: var(--space-3) 0 0;
+  }
+
+  .lost p {
+    margin: 0;
+    font-size: 16px;
+  }
+
   .white {
-    width: calc(4 * var(--size-target));
+    width: 180px;
     transform-origin: 0 50%;
-    /* It waves twice and comes to rest; not at all for visitors who asked for calm. */
-    animation: wave 2s ease-in-out 2;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .white {
+      animation: wave 3s ease-in-out infinite;
+    }
   }
 
   @keyframes wave {

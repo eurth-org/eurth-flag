@@ -2,17 +2,9 @@
   import { colorName } from '../flag/colors';
   import Swatches from './Swatches.svelte';
 
-  // A colour as a button; pressing it opens the palette beneath. With `named`, the button says
-  // what the colour is for and what it is called; without, it is a square of the colour alone,
-  // for rows where the words beside it already say which part it paints.
-  let {
-    value,
-    label,
-    name,
-    named = false,
-    disabled = false,
-    onchange,
-  }: { value: string; label: string; name: string; named?: boolean; disabled?: boolean; onchange: (color: string) => void } = $props();
+  // A colour as a small button; pressing it opens the palette beneath. Used where rows of
+  // swatches would take too much room: band lists and layers.
+  let { value, label, name, onchange }: { value: string; label: string; name: string; onchange: (color: string) => void } = $props();
 
   let open = $state(false);
   let root: HTMLElement;
@@ -20,10 +12,6 @@
   function outside(event: Event) {
     if (open && !root.contains(event.target as Node)) open = false;
   }
-
-  $effect(() => {
-    if (disabled) open = false;
-  });
 </script>
 
 <svelte:window onpointerdown={outside} onkeydown={(e) => e.key === 'Escape' && (open = false)} />
@@ -31,17 +19,13 @@
 <span class="color-button" bind:this={root}>
   <button
     type="button"
-    class="eu-btn"
-    class:eu-btn--icon={!named}
+    class="chip"
+    style:background={value}
     aria-label="{label}: {colorName(value)}. Change colour"
     aria-expanded={open}
-    title={named ? undefined : `${label}: ${colorName(value)}`}
-    {disabled}
+    title="{label}: {colorName(value)}"
     onclick={() => (open = !open)}
-  >
-    <span class="chip" style:background={value}></span>
-    {#if named}<span>{label}: {colorName(value)}</span>{/if}
-  </button>
+  ></button>
   {#if open}
     <div class="popover">
       <Swatches {value} {label} {name} {onchange} />
@@ -50,31 +34,38 @@
 </span>
 
 <style>
-  /* The palette opens under the button, or under the row of buttons it sits in: a row sets
-     --color-anchor to static and is itself the place the palette hangs from. */
   .color-button {
-    position: var(--color-anchor, relative);
+    position: relative;
     display: inline-flex;
   }
 
   .chip {
-    flex: none;
-    width: var(--space-6);
-    height: var(--space-6);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-control);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    cursor: pointer;
+  }
+
+  .chip:hover {
+    box-shadow:
+      inset 0 0 0 1px var(--line-strong),
+      0 0 0 2px var(--surface-raised),
+      0 0 0 4px var(--selected);
   }
 
   .popover {
     position: absolute;
-    top: calc(100% + var(--space-2));
+    top: calc(100% + 6px);
     left: 0;
     z-index: 10;
-    width: calc(6 * var(--size-target) + 5 * var(--space-1) + 2 * var(--space-3) + 2px);
-    max-width: calc(100vw - 2 * var(--space-4));
+    width: min(280px, 80vw);
     padding: var(--space-3);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-panel);
     background: var(--surface);
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
   }
 </style>

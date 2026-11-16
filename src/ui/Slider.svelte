@@ -12,8 +12,8 @@
     onchange,
   }: { value: number; label: string; min: number; max: number; step?: number; unit?: string; onchange: (value: number) => void } = $props();
 
-  const id = $props.id();
   const fill = $derived(Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)));
+
   let range: HTMLInputElement | undefined = $state();
 
   function set(raw: string) {
@@ -26,56 +26,53 @@
   $effect(() => watch(value, () => range));
 </script>
 
-<div class="room">
-<div class="slider">
-  <label class="eu-label" for="{id}-range">{label}</label>
-  <input bind:this={range} id="{id}-range" class="eu-range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
+<label class="slider">
+  <span class="name">{label}</span>
+  <input bind:this={range} class="range" type="range" {min} {max} {step} {value} style:--fill="{fill}%" oninput={(e) => set(e.currentTarget.value)} />
   <span class="number">
-    <input class="eu-input eu-input--data" type="number" {step} {value} aria-label="{label}{unit ? ` (${unit})` : ''}, as a number" onchange={(e) => set(e.currentTarget.value)} />
-    <span class="unit eu-help" aria-hidden="true">{unit}</span>
+    <input type="number" {step} {value} aria-label="{label}{unit ? ` (${unit})` : ''}" onchange={(e) => set(e.currentTarget.value)} />
+    <span class="unit" aria-hidden="true">{unit}</span>
   </span>
-</div>
-</div>
+</label>
 
 <style>
-  .room {
-    container-type: inline-size;
-  }
-
   .slider {
     display: grid;
-    grid-template-columns: calc(2 * var(--size-target)) minmax(0, 1fr) auto;
+    grid-template-columns: 96px minmax(0, 1fr) 78px;
     align-items: center;
-    gap: var(--space-1) var(--space-3);
+    gap: var(--space-2);
   }
 
-  .eu-label {
+  .name {
     color: var(--ink-muted);
+    font-size: 13px;
   }
 
   .number {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: 2px;
   }
 
   .number input {
-    width: calc(2 * var(--size-target));
+    width: 58px;
+    padding: 2px 4px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: var(--surface);
     text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   .unit {
-    width: var(--space-4);
+    width: 14px;
+    color: var(--ink-muted);
+    font-size: 12px;
   }
 
-  /* Where there's little room, the name gets a line of its own. */
-  @container (max-width: 400px) {
+  @media (max-width: 420px) {
     .slider {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .eu-label {
-      grid-column: 1 / -1;
+      grid-template-columns: 72px minmax(0, 1fr) 70px;
     }
   }
 </style>

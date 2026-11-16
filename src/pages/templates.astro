@@ -1,59 +1,98 @@
 ---
 // The classic flag layouts, each drawn at build time and opening in the maker with one click.
 // The links are made with the same code the maker reads them with, so they can never drift apart.
-// The page is built from the suite's parts for written pages: PageHead and a gallery of tiles.
-import Line from '@eurth/style/components/Line.astro';
-import Page from '@eurth/style/components/Page.astro';
-import PageHead from '@eurth/style/components/PageHead.astro';
-import { lineArrowRight } from '@eurth/style/line';
 import { site } from '../../eurth.config.mjs';
-import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
 import { describeFlag } from '../flag/describe';
 import { simpleLink } from '../flag/link';
 import { fromSimple } from '../flag/simple';
 import { templates } from '../flag/templates';
+import Base from '../layouts/Base.astro';
 
-// The flag at the head of the page: one of the layouts below.
-const head = templates.find((t) => t.id === 'hoist-triangle')!;
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Flag templates',
+    url: `${site.url}/templates/`,
+    description: 'Classic flag layouts to start from, free to change.',
+    hasPart: templates.map((t) => ({ '@type': 'CreativeWork', name: t.name, description: t.about })),
+  },
+];
 ---
 
-<Page
-  site={site}
+<Base
   title={`Flag templates: ${templates.length} classic layouts to start from`}
   description="Free flag templates: tricolour, Nordic cross, saltire, canton, hoist triangle, pall and more. Open one in the flag maker, change its colours and symbol, and make it yours."
-  crumbs={[{ name: 'Templates', path: '/templates/' }]}
+  crumb={{ name: 'Templates', path: '/templates/' }}
+  jsonld={jsonld}
 >
-  <PageHead site={site} kicker="Templates" title="Flag templates: the classic layouts">
-    <Fragment slot="lead">
-      Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what you have in mind, open it in the{' '}
-      <a href="/">maker</a> and make it yours. The <a href="/guide/">guide</a> says what makes a flag good; the <a href="/glossary/">glossary</a> has the words.
-    </Fragment>
-    <a slot="art" href={simpleLink(head.simple)} aria-label="Open this flag in the maker"><Flag flag={fromSimple(head.simple)} id="tpl-head" title={head.name} /></a>
-  </PageHead>
+  <div class="page">
+    <p class="crumbs"><a href="/">Flag maker</a> › Templates</p>
+    <div class="prose">
+      <h1>Flag templates: the classic layouts</h1>
+      <p class="lede">
+        Almost every flag in the world is one of a few layouts with its own colours and symbol. Pick the one closest to what
+        you have in mind, open it in the <a href="/">maker</a> and make it yours. The <a href="/guide/">guide</a> says what
+        makes a flag good; the <a href="/glossary/">glossary</a> has the words.
+      </p>
+    </div>
+    <ul class="gallery">
+      {
+        templates.map((t) => {
+          const flag = fromSimple(t.simple);
+          return (
+            <li id={t.id}>
+              <a href={simpleLink(t.simple)} aria-label={`Open the ${t.name.toLowerCase()} template in the flag maker`}>
+                <Flag flag={flag} id={`tpl-${t.id}`} title={t.name} />
+              </a>
+              <h2>{t.name}</h2>
+              <p>{t.about}</p>
+              <p class="blazon">{describeFlag(flag)}</p>
+              <p><a href={simpleLink(t.simple)}>Open in the maker</a></p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</Base>
 
-  <ul class="eu-gallery">
-    {
-      templates.map((t) => {
-        const flag = fromSimple(t.simple);
-        return (
-          <li id={t.id}>
-            <a class="eu-tile" href={simpleLink(t.simple)}>
-              <div class="eu-tile-art">
-                <Flag flag={flag} id={`tpl-${t.id}`} />
-              </div>
-              <div class="eu-tile-words">
-                <h2>{t.name}</h2>
-                <p>{t.about}</p>
-                <p class="eu-help">{describeFlag(flag)}</p>
-                <span class="eu-tile-go">Open in the maker <Line icon={lineArrowRight} /></span>
-              </div>
-            </a>
-          </li>
-        );
-      })
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-6) var(--space-4);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gallery a {
+    display: block;
+  }
+
+  .gallery h2 {
+    margin: var(--space-3) 0 var(--space-1);
+    font-size: 17px;
+  }
+
+  .gallery p {
+    margin: 0 0 var(--space-1);
+  }
+
+  .blazon {
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gallery a :global(.flag) {
+      transition: transform 0.2s;
     }
-  </ul>
 
-  <Credits slot="inspirations" />
-</Page>
+    .gallery a:hover :global(.flag) {
+      transform: translateY(-2px) rotate(-1deg);
+    }
+  }
+</style>

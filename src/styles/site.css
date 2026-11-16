@@ -1,0 +1,172 @@
+/* The page around the tool, inside the .fw wrapper (layouts/Base.astro): Flagwright's own
+   row under the suite's header, and the written pages. The blue bars, the name and tagline,
+   the thanks and the skip link that used to be here are the suite's now (@eurth/style). */
+
+/* On wide screens, the bars' contents line up with the page below instead of the screen's edges. */
+:where(.fw) .bar {
+  max-width: calc(1200px - 2 * var(--space-4));
+  margin: 0 auto;
+}
+
+/* Flagwright's own row under the suite's header. The name and the tagline are in the suite's
+   header now, so the flag (the Eurth yurt on a flag) and the Preview badge stand here on
+   their own. */
+:where(.fw) .header {
+  position: relative;
+  z-index: 3;
+  background: var(--header);
+  padding: var(--space-2) var(--space-4);
+}
+
+:where(.fw) .header .bar {
+  min-height: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+:where(.fw) .brand,
+:where(.fw) .home {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+:where(.fw) .home {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-control);
+}
+
+:where(.fw) .logo {
+  display: inline-flex;
+}
+
+:where(.fw) .logo svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+  transform-origin: 16% 90%;
+}
+
+/* The flag in the logo catches the wind when pointed at. */
+@media (prefers-reduced-motion: no-preference) {
+  :where(.fw) .home:hover .logo svg,
+  :where(.fw) .home:focus-visible .logo svg {
+    animation: flutter 0.9s ease-in-out;
+  }
+}
+
+@keyframes flutter {
+  20% {
+    transform: rotate(-9deg);
+  }
+  45% {
+    transform: rotate(6deg);
+  }
+  70% {
+    transform: rotate(-3deg);
+  }
+}
+
+:where(.fw) .badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 6px;
+}
+
+:where(.fw) .icon {
+  flex: none;
+  vertical-align: -0.125em;
+}
+
+/* Panels, as in the tool. */
+:where(.fw) .panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: var(--space-4);
+}
+
+/* A flag picture: a thin edge, so white flags show on white pages. */
+:where(.fw) .flag {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  line-height: 0;
+}
+
+:where(.fw) .flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Written pages: one readable column. */
+:where(.fw) .page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+:where(.fw) .prose {
+  max-width: 760px;
+}
+
+:where(.fw) .prose h1,
+:where(.fw) .page > h1 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 30px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+:where(.fw) .prose h2 {
+  margin: var(--space-8) 0 var(--space-2);
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+:where(.fw) .prose h3 {
+  margin: var(--space-6) 0 var(--space-1);
+  font-size: 16px;
+}
+
+:where(.fw) .prose p,
+:where(.fw) .prose li {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+:where(.fw) .prose p {
+  margin: 0 0 var(--space-3);
+}
+
+:where(.fw) .lede {
+  color: var(--ink-muted);
+  font-size: 18px !important;
+}
+
+:where(.fw) .crumbs {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* A call to the tool. */
+:where(.fw) .cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 16px;
+  text-decoration: none;
+}

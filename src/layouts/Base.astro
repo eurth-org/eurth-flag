@@ -1,0 +1,50 @@
+---
+// Every page. The suite's shell (@eurth/style's Page) gives the head, the header and the footer;
+// everything between them is Flagwright's own, kept exactly as it was perfected on
+// flag.eurth.org, and lives inside the .fw wrapper: its tokens and styles (styles/app.css,
+// styles/site.css) apply there and nowhere else, and the suite's don't reach in (CLAUDE.md).
+import '../styles/app.css';
+import '../styles/site.css';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import logo from '../assets/logo.svg?raw';
+import Credits from '../components/Credits.astro';
+
+interface Props {
+  /** The page's own title; the site's name is added. The start page leaves it out. */
+  title?: string;
+  description?: string;
+  /** Structured data for search engines: one object per thing the page is about. */
+  jsonld?: object[];
+  noindex?: boolean;
+  /** The page's name and address, for the breadcrumb search engines show. */
+  crumb?: { name: string; path: string };
+}
+const { title, description, jsonld = [], noindex = false, crumb } = Astro.props;
+---
+
+<Page site={site} title={title} description={description} crumbs={crumb ? [crumb] : undefined} jsonld={jsonld} noindex={noindex}>
+  <div class="fw">
+    <!-- Flagwright's own row. The name and the tagline are in the suite's header now, so the
+         flag and the Preview badge stand here on their own. -->
+    <div class="header">
+      <div class="bar">
+        <div class="brand">
+          <!-- Like any site's logo, this one goes home: a fresh flag. -->
+          <a class="home" href="/" title="Flagwright: start afresh" aria-label="Flagwright: start afresh"><span class="logo" set:html={logo} /></a>
+          <span class="badge">Preview</span>
+        </div>
+      </div>
+    </div>
+
+    <slot />
+  </div>
+
+  <Credits slot="inspirations" />
+</Page>
+
+<script>
+  import { clickDelights } from '../ui/fun';
+
+  clickDelights();
+</script>

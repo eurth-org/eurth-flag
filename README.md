@@ -6,13 +6,15 @@ Flags made to fly. Flagwright is a free online flag maker for worldbuilders, wri
 
 Live page: https://flag.eurth.org
 
-The rules every Eurth tool follows are in the handbook, [`node_modules/@eurth/style/HANDBOOK.md`](https://style.eurth.org/handbook/). On anything the tools share, the handbook wins. What's planned, what each release added and what's not planned is in the [roadmap](roadmap.md); points from reviews are in the [feedback log](docs/feedback-log.md).
+Flagwright keeps its own design, exactly as it was perfected before the shared shell: the suite provides the header and the footer, and everything between them looks and works as it always has. See [CLAUDE.md](CLAUDE.md).
+
+The rules every Eurth tool follows are in the handbook, [`node_modules/@eurth/style/HANDBOOK.md`](https://style.eurth.org/handbook/). On everything else the tools share, the handbook wins. What's planned, what each release added and what's not planned is in the [roadmap](roadmap.md); points from reviews are in the [feedback log](docs/feedback-log.md).
 
 ## Use
 
-Open the maker and pick a division, an overlay, a symbol and their colours (Simple), or switch to Advanced and place every band and layer by hand. **Random** rolls a flag to start from; it asks once before it replaces a flag you have changed. The design check reads the flag the way a vexillologist would. Then:
+Open the maker and pick a division, an overlay, a symbol and their colours (Simple), or switch to Advanced and place every band and layer by hand. **Random** rolls a flag to start from; once you have changed a flag it turns red when pointed at, and it asks once before it replaces one. The design check reads the flag the way a vexillologist would. Then:
 
-- **Copy link.** The link holds the whole flag: `?s=1.…` for a simple flag, `?f=1.…` for an advanced one, `&n=` for its name. Copying the link is saving the flag.
+- **Save** or **Copy link.** The link holds the whole flag: `?s=1.…` for a simple flag, `?f=1.…` for an advanced one, `&n=` for its name. Copying the link is saving the flag, so that is what Save does.
 - **Download** it as SVG, PNG or WebP: the flag alone at up to 3840 pixels wide, or on a Night ground in the sizes social sites like (link preview, square, portrait, story, pin, wide).
 - **Copy picture** or **Copy description**, or **Share** it to the Eurth forum and ten other places.
 - **Copy Markdown**, or download it as a `.md` file, for the forum and wikis: the flag's name, its written description, the design check's score and its link.
@@ -25,7 +27,8 @@ Nothing is stored in the browser: no cookies, no localStorage, no account. Links
 - A static site built with Astro; the maker is a Svelte component that wakes up in the browser. There is no server-side code.
 - The shell (header, footer, theme switch, share dialog, toasts, offline note, service worker, security headers, web manifest, `robots.txt`, `llms.txt`) comes from [`@eurth/style`](https://style.eurth.org), and the profile file from `@eurth/profile`. Both are installed from GitHub and built into the site; nothing is loaded at run time from another address.
 - The engine in `src/flag/` is plain TypeScript with no browser or framework in it: a flag is data, and one function draws it as SVG text. The editor, the downloads, the template pages (at build time), the sharing image and the tests all use that one function.
-- The interface uses only `@eurth/style`'s tokens and `eu-` classes. The flag palette and the emblems are the tool's data.
+- Between the suite's header and footer the tool wears its own design. Every page is `src/layouts/Base.astro`, which wraps the page in `.fw`; Flagwright's tokens and styles (`src/styles/app.css`, `src/styles/site.css` and each component) apply inside that wrapper only, and the suite's base styles are undone there, so neither stylesheet reaches into the other's part of the page. The suite's own windows (the share dialog, Random's question) keep the suite's look.
+- It is held to WCAG 2.2 AA with 24px targets (`"eurth"` in `package.json`), not the suite's AAA and 44px: an exception on Stijn's word, 16 November 2026.
 
 ## Where things live
 
@@ -48,11 +51,13 @@ Nothing is stored in the browser: no cookies, no localStorage, no account. Links
 | The maker: modes, history, link, share, downloads, profile | `src/ui/Maker.svelte` |
 | Simple and advanced controls | `src/ui/SimpleControls.svelte`, `src/ui/AdvancedControls.svelte` |
 | The flag on screen: selecting and dragging layers | `src/ui/Stage.svelte` |
-| Flagwright's own pieces of layout (tokens only) | `src/styles/flagwright.css` |
-| Pages: maker, templates, guide, glossary, 404 (the written ones built from `@eurth/style`'s `PageHead`, `Figure`, `Note` and `Toc`) | `src/pages/` |
+| The page around every page: the suite's shell, the `.fw` wrapper, the flag and the Preview badge | `src/layouts/Base.astro` |
+| Flagwright's own tokens, buttons, pills, sliders and tooltips, scoped to `.fw` | `src/styles/app.css` |
+| Its panels, flags on a page and written pages, scoped to `.fw` | `src/styles/site.css` |
+| Pages: maker, templates, guide, glossary, 404 | `src/pages/` |
 | The footer's credits | `src/components/Credits.astro` |
 | Icons and the sharing image | `tools/make-images.mjs` (from `src/assets/logo.svg` and the templates) |
-| The checks every tool runs; Flagwright's own | `tests/shell.test.js`; `tests/flag.test.ts` |
+| The checks every tool runs; Flagwright's own | `tests/shell.test.js`; `tests/flag.test.ts`, `tests/contrast.test.ts` |
 | The moment the door opened | `LAUNCH_AT` |
 
 ## Adding to it
@@ -74,7 +79,7 @@ npm run dev          # the site while you work
 npm run check        # types
 npm run build        # the static site, into dist/
 npm test             # the tool's own tests and the suite's checks (they read dist/)
-npm run axe          # accessibility: every page, both themes
+npm run axe          # accessibility: every page, both themes, at WCAG 2.2 AA
 npm run smoke        # the built site in real Chrome: theme, nothing stored, offline
 npm run preview      # the built site with its real headers (wrangler dev)
 npm run images       # icons and the sharing image, after changing them (needs Google Chrome)
@@ -95,7 +100,7 @@ GitHub Actions checks, builds and tests every push and pull request, and deploys
 ## Credits
 
 - Inspired by [Scrontch's Flag Designer](https://scrontch.eu/flags/) by Lars Ruoff and [FlagMaker Jr.](https://andrewsarnold.github.io/FlagMaker-Jr/) by Andrew Arnold. Written from scratch: no code or artwork is taken from either.
-- Icons and emblems by [Font Awesome](https://fontawesome.com) Free (CC BY 4.0); the icons that draw themselves by line-md (MIT).
+- Icons and emblems by [Font Awesome](https://fontawesome.com) Free (CC BY 4.0); the icons that draw themselves in the header and footer by line-md (MIT).
 - The design check follows the principles in Ted Kaye's *Good Flag, Bad Flag* (NAVA), in its own words.
 
 ## Licence

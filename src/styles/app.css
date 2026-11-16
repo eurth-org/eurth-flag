@@ -1,0 +1,640 @@
+/* Flagwright's own design, kept exactly as it was perfected on flag.eurth.org. The suite
+   (@eurth/style) provides the header and the footer; everything between them is Flagwright's,
+   and lives inside the .fw wrapper (layouts/Base.astro).
+
+   So this file does two jobs, both scoped to .fw:
+   1. It gives the tool its own tokens. Several share a name with the suite's (--ink-muted,
+      --accent-text, --danger and more) but not a value: declared on .fw, they apply inside the
+      tool and nowhere else.
+   2. It keeps the suite's base styles from restyling the tool: headings, paragraphs, lists,
+      links, code and tooltips go back to what they were, so the components' own styles land
+      on the same ground they were written on.
+
+   Flagwright shares Governmint's look (gov.eurth.org): the forum's light scheme, and its
+   Solarized dark scheme ("Night"). Every text pair meets WCAG 2.2 AA (contrast.test.ts checks
+   them). Flagwright is held to AA, not to the suite's AAA and 44px targets: Stijn,
+   16 November 2026 (CLAUDE.md). */
+.fw {
+  --eurth-blue: #2698d4;
+  --eurth-blue-deep: #1b6fa0;
+  --night: #002b36;
+  --parchment: #fcf6e1;
+  /* Selected options and primary buttons are Eurth blue with white text: a brand decision.
+     White on Eurth blue is 3.2:1, below WCAG's 4.5:1 (contrast.test.ts lists it as an exception). */
+  --selected: var(--eurth-blue);
+  --on-selected: #ffffff;
+  --selected-edge: var(--selected);
+  --hover: #e6f1f8;
+  --track: #e3e3e3;
+
+  --surface: #ffffff;
+  --surface-raised: #f8f8f8;
+  --header: #ffffff;
+  --line: #e9e9e9;
+  --line-strong: #646464;
+  --ink: #222222;
+  --ink-muted: #5f5f5f;
+  --button: #e9e9e9;
+  --accent-fill: var(--eurth-blue);
+  --on-accent-small: var(--night);
+  --accent-text: #1b6fa0;
+  --focus-ring: var(--accent-text);
+  --danger: #c80001;
+  --good: #1a7f37;
+  --unusual: #b35c00;
+  --flash: #ffff4d;
+
+  --font-sans: system-ui, Arial, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 2px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+}
+
+/* Eurth blue as the brand specifies it, on screens with wide colour; #2698d4 elsewhere. */
+@supports (color: color(display-p3 0 0 0)) {
+  .fw {
+    --eurth-blue: color(display-p3 0.2981 0.5884 0.8115);
+  }
+}
+
+/* Night. The suite's head script sets data-theme on <html> before the first paint; without
+   script nothing is set, and the page follows the device. */
+:root[data-theme='dark'] .fw {
+  --surface: var(--night);
+  --surface-raised: #0d353f;
+  --header: var(--night);
+  --line: #193f47;
+  --line-strong: #798c88;
+  --ink: var(--parchment);
+  --ink-muted: #a2b0a8;
+  --button: #193f47;
+  --accent-text: #3eafe7;
+  --danger: #f07c63;
+  --good: #5fd38a;
+  --unusual: #f7a541;
+  --flash: #6b6a1f;
+  --hover: #164a57;
+  --track: #3a6470;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .fw {
+    --surface: var(--night);
+    --surface-raised: #0d353f;
+    --header: var(--night);
+    --line: #193f47;
+    --line-strong: #798c88;
+    --ink: var(--parchment);
+    --ink-muted: #a2b0a8;
+    --button: #193f47;
+    --accent-text: #3eafe7;
+    --danger: #f07c63;
+    --good: #5fd38a;
+    --unusual: #f7a541;
+    --flash: #6b6a1f;
+    --hover: #164a57;
+    --track: #3a6470;
+  }
+}
+
+/* The height of the maker's sticky bar: the flag sticks under it, and jumps within the page
+   land below it. On small screens the bar scrolls away, and the flag alone stays in view.
+   (On the root, since the page's own scrolling needs it; the suite has no token of this name.) */
+:root {
+  --nav-height: 52px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --nav-height: 0px;
+  }
+}
+
+html:has(.fw) {
+  scroll-padding-top: calc(var(--nav-height) + 16px);
+}
+
+/* The tool fills the page from edge to edge between the suite's header and footer, as it does
+   on its own: its bars run the full width and its columns centre themselves. */
+.eu-main:has(.fw) {
+  max-width: none;
+  padding: 0;
+}
+
+/* The tool's own ground: what the page's body gave it before the shared shell. */
+.fw {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* The suite's base styles, undone inside the tool. "html :where(.fw) x" outranks the suite's
+   bare element selectors wherever the two stylesheets land in the page, and still gives way to
+   every component's own (class-scoped) rule. A window of the suite's (.eu-dialog) is left as
+   the suite made it. */
+html :where(.fw) :is(h1, h2, h3, h4):where(:not(.eu-dialog *)) {
+  margin: revert;
+  font: revert;
+  text-wrap: revert;
+}
+
+html :where(.fw) :is(p, ul, ol, dl, figure, blockquote):where(:not(.eu-dialog *)) {
+  margin: revert;
+}
+
+html :where(.fw) :is(code, kbd, samp, pre):where(:not(.eu-dialog *)) {
+  font: revert;
+}
+
+html :where(.fw) :is(img, svg, video, canvas):where(:not(.eu-dialog *)) {
+  max-width: none;
+}
+
+html :where(.fw) a:where(:not(.eu-dialog *)) {
+  color: var(--accent-text);
+  text-underline-offset: auto;
+}
+
+/* The suite turns links ink when pointed at; Flagwright's keep their colour. (A link that is a
+   button is ink already, and stays so.) */
+html :where(.fw) a:where(:not(.eu-dialog *, .btn)):hover {
+  color: var(--accent-text);
+}
+
+/* Buttons and option pills: slightly rounded, lifting a little on hover. */
+:where(.fw) .btn,
+:where(.fw) .pill {
+  border-radius: var(--radius-control);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+:where(.fw) .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  background: var(--button);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+:where(.fw) .pill {
+  /* --pad is the side padding of a chosen option. Unchosen ones get 9px more on each side: the
+     room the check mark takes (12px, and the 6px gap), so choosing never changes the width. */
+  --pad: 12px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px calc(var(--pad) + 9px);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+:where(.fw) .pill input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+:where(.fw) .btn:hover,
+:where(.fw) .pill:hover {
+  background: var(--hover);
+  border-color: var(--selected-edge);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
+  transform: translateY(-1px);
+}
+
+/* Selected options and primary buttons: white on the deeper Eurth blue. */
+:where(.fw) .btn-primary,
+:where(.fw) .btn-primary:hover,
+:where(.fw) .pill:has(input:checked),
+:where(.fw) .pill:has(input:checked):hover {
+  background: var(--selected);
+  border-color: var(--selected-edge);
+  color: var(--on-selected);
+  font-weight: 700;
+}
+
+/* The check mark in front of a selected option. */
+:where(.fw) .pill .check {
+  display: none;
+  justify-content: center;
+  width: 12px;
+  font-size: 12px;
+}
+
+:where(.fw) .pill:has(input:checked) {
+  padding-inline: var(--pad);
+}
+
+:where(.fw) .pill:has(input:checked) .check {
+  display: inline-flex;
+}
+
+/* Options whose own icon says enough (chart types, export formats): no check mark, so no room
+   kept for one either. */
+:where(.fw) .pill.plain {
+  padding-inline: var(--pad);
+}
+
+/* Text that turns bold when chosen keeps room for its bold self (a hidden bold copy sets the
+   width), so the options beside it never shift. Put the text in data-text too. */
+:where(.fw) .steady {
+  display: inline-grid;
+}
+
+:where(.fw) .steady::after {
+  content: attr(data-text) / '';
+  height: 0;
+  visibility: hidden;
+  font-weight: 700;
+  user-select: none;
+  pointer-events: none;
+}
+
+:where(.fw) .steady,
+:where(.fw) .steady::after {
+  grid-area: 1 / 1;
+}
+
+:where(.fw) .pill:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.fw) .btn,
+  :where(.fw) .pill {
+    transition: none;
+  }
+
+  :where(.fw) .btn:hover,
+  :where(.fw) .pill:hover {
+    transform: none;
+  }
+}
+
+/* Motion switched off in the footer (the suite's switch): the same as the device asking. */
+html[data-motion='still'] :where(.fw) :is(.btn, .pill):hover {
+  transform: none;
+}
+
+/* Buttons that come from the shared packages (Random, and the profile file's Load and Save)
+   wear Flagwright's own button, so a row of buttons in the tool reads as one. Not inside a
+   window of the suite's: that keeps the suite's look, tokens and all (below). */
+.fw .eu-btn:not(.eu-dialog *) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: normal;
+  gap: 6px;
+  min-width: auto;
+  min-height: auto;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--button);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.fw .eu-btn:not(.eu-dialog *):hover {
+  background: var(--hover);
+  border-color: var(--selected-edge);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
+  transform: translateY(-1px);
+}
+
+/* Random, once there is a flag to lose: red when pointed at or reached with the keyboard,
+   since a roll replaces the flag. */
+.fw .eu-btn.eu-btn--risky:not(.eu-dialog *):is(:hover, :focus-visible) {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.fw .eu-btn:not(.eu-dialog *):disabled {
+  border-style: solid;
+  border-color: transparent;
+  background: var(--button);
+  color: var(--ink);
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fw .eu-btn:not(.eu-dialog *):active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fw .eu-btn:not(.eu-dialog *) {
+    transition: none;
+  }
+
+  .fw .eu-btn:not(.eu-dialog *):hover {
+    transform: none;
+  }
+}
+
+html[data-motion='still'] .fw .eu-btn:not(.eu-dialog *):hover {
+  transform: none;
+}
+
+/* A window of the suite's that opens from inside the tool (Random's question, Share) inherits
+   the tool's tokens from its place in the page. It gets the suite's own back: the root keeps a
+   copy of each token Flagwright redefines with another value, and the window reads the copies. */
+:root {
+  --suite-eurth-blue: var(--eurth-blue);
+  --suite-selected: var(--selected);
+  --suite-accent-fill: var(--accent-fill);
+  --suite-ink-muted: var(--ink-muted);
+  --suite-accent-text: var(--accent-text);
+  --suite-focus-ring: var(--focus-ring);
+  --suite-danger: var(--danger);
+  --suite-type-body: var(--type-body);
+}
+
+.fw .eu-dialog {
+  --eurth-blue: var(--suite-eurth-blue);
+  --selected: var(--suite-selected);
+  --accent-fill: var(--suite-accent-fill);
+  --ink-muted: var(--suite-ink-muted);
+  --accent-text: var(--suite-accent-text);
+  --focus-ring: var(--suite-focus-ring);
+  --danger: var(--suite-danger);
+  font: var(--suite-type-body);
+}
+
+/* Sliders, drawn the same in every browser (Chrome and Safari draw native ones differently):
+   a light track, filled in Eurth blue up to the value. Set --fill to the value as a percentage. */
+:where(.fw) .range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--selected) 0 var(--fill, 50%), var(--track) var(--fill, 50%) 100%);
+  cursor: pointer;
+}
+
+:where(.fw) .range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--selected);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+:where(.fw) .range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--selected);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+:where(.fw) .range::-moz-range-track {
+  background: transparent;
+}
+
+/* Small delights, only for visitors who don't ask for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The check mark pops in when an option is chosen. */
+  :where(.fw) .pill:has(input:checked) .check {
+    animation: pop 0.25s cubic-bezier(0.3, 1.6, 0.6, 1);
+  }
+
+  /* Slider handles grow under the pointer, a little more while held. */
+  :where(.fw) .range::-webkit-slider-thumb {
+    transition: transform 0.15s;
+  }
+
+  :where(.fw) .range:hover::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+
+  :where(.fw) .range:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+  }
+
+  :where(.fw) .range::-moz-range-thumb {
+    transition: transform 0.15s;
+  }
+
+  :where(.fw) .range:hover::-moz-range-thumb {
+    transform: scale(1.15);
+  }
+
+  :where(.fw) .range:active::-moz-range-thumb {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0);
+  }
+}
+
+/* Delights from @eurth/style: a toast and "Nice.". They sit on the page itself, outside its
+   layout (and outside .fw), so their look is written here as it is on flag.eurth.org. Both are
+   made by the suite's own helpers, under the suite's class names. */
+body > .eu-toast {
+  display: block;
+  max-width: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font: 600 15px/1.45 system-ui, Arial, sans-serif;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
+}
+
+/* "Nice." (the suite's niceWatcher), when a slider settles on 69. */
+body > .eu-nice {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font: 700 13px/1.45 system-ui, Arial, sans-serif;
+}
+
+/* Smooth, not jerky: in-page jumps glide (the suite's stylesheet sees to that, and stops it
+   when motion is switched off). */
+
+:where(.fw) .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Clicks: buttons press in, and their icons act out what the button does (ui/fun.ts). */
+@media (prefers-reduced-motion: no-preference) {
+  :where(.fw) .btn:active,
+  :where(.fw) .pill:active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: none;
+  }
+
+  :where(.fw) .clicked .icon {
+    animation: click-pop 0.35s cubic-bezier(0.3, 1.6, 0.6, 1);
+  }
+
+  :where(.fw) .clicked[data-click='spin-back'] .icon {
+    animation: click-spin-back 0.6s cubic-bezier(0.3, 1.2, 0.5, 1);
+  }
+
+  :where(.fw) .clicked[data-click='tumble'] .icon {
+    animation: click-tumble 0.6s cubic-bezier(0.3, 1.2, 0.5, 1);
+  }
+
+  :where(.fw) .clicked[data-click='bounce'] .icon {
+    animation: click-bounce 0.5s ease-out;
+  }
+
+  :where(.fw) .clicked[data-click='swing-left'] .icon {
+    animation: click-swing-left 0.45s ease-out;
+  }
+
+  :where(.fw) .clicked[data-click='swing-right'] .icon {
+    animation: click-swing-right 0.45s ease-out;
+  }
+}
+
+@keyframes click-pop {
+  40% {
+    transform: scale(1.35);
+  }
+}
+
+@keyframes click-spin-back {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes click-tumble {
+  30% {
+    transform: translateY(-6px) rotate(-90deg);
+  }
+  70% {
+    transform: translateY(0) rotate(-200deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes click-bounce {
+  30% {
+    transform: translateY(3px) scaleY(0.8);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes click-swing-left {
+  40% {
+    transform: rotate(-60deg);
+  }
+}
+
+@keyframes click-swing-right {
+  40% {
+    transform: rotate(60deg);
+  }
+}
+
+/* Tooltips for buttons: data-tip holds the text (aria-label carries it for screen readers).
+   They appear under the button at once, aligned to its right edge so they stay on screen, stay
+   while pointed at, and go with Escape (WCAG 1.4.13). The suite has tooltips of its own on the
+   same attribute, so every property it sets is set back here. */
+html :where(.fw) [data-tip]:is(:hover, :focus-visible) {
+  z-index: auto;
+}
+
+.fw [data-tip]:hover::after,
+.fw [data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  bottom: auto;
+  z-index: 20;
+  /* As wide as its text, whatever the button's own layout (a grid would squeeze it). */
+  width: max-content;
+  max-width: 320px;
+  padding: 3px 8px;
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: inherit;
+  white-space: nowrap;
+  pointer-events: auto;
+  animation: none;
+}
+
+/* A tooltip at the left edge of the screen lines up with its button's left edge instead. */
+.fw [data-tip-align='start']:hover::after,
+.fw [data-tip-align='start']:focus-visible::after {
+  right: auto;
+  left: 0;
+}
+
+/* Escape hides tooltips until the pointer moves again (the suite's shell sees to the class). */
+.eu-tips-hidden .fw [data-tip]::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fw [data-tip]:hover::after,
+  .fw [data-tip]:focus-visible::after {
+    animation: tip-in 0.15s ease-out;
+  }
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}

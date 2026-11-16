@@ -1,30 +1,12 @@
 ---
 // The words flags are described in, each in a sentence, with a picture where one helps.
 // Each term has an id to link to, and the whole set is given to search engines as a DefinedTermSet.
-// The page is built from the suite's parts for written pages: PageHead, Figure, Toc and eu-terms.
-import { resolveColors } from '@eurth/style';
 import { definedTermSet } from '@eurth/style/build';
-import Figure from '@eurth/style/components/Figure.astro';
-import Line from '@eurth/style/components/Line.astro';
-import Page from '@eurth/style/components/Page.astro';
-import PageHead from '@eurth/style/components/PageHead.astro';
-import Toc from '@eurth/style/components/Toc.astro';
-import { lineEdit } from '@eurth/style/line';
-import tokens from '@eurth/style/tokens.json';
 import { site } from '../../eurth.config.mjs';
-import Credits from '../components/Credits.astro';
 import Flag from '../components/Flag.astro';
 import { simpleLink } from '../flag/link';
 import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
-import { templates } from '../flag/templates';
-
-// The diagram's labels can't use the stylesheet's custom properties (it is a picture of a flag,
-// the same in both themes), so they take night from the tokens as a plain value: dark on the
-// flag's light blue field, white on its dark canton.
-const night = resolveColors(tokens, 'dark').night;
-
-// The flag at the head of the page: stripes, a canton and a charge, three of the words below.
-const head = templates.find((t) => t.id === 'canton')!.simple;
+import Base from '../layouts/Base.astro';
 
 const s = (changes: Partial<Simple>): Simple => ({ ...defaultSimple(), overlay: 'none', symbol: 'none', colors: ['#0a1f5c', '#ffffff', '#ce1126'], ...changes });
 
@@ -106,71 +88,69 @@ const groups: { title: string; id: string; intro: string; terms: Term[] }[] = [
 
 const all = groups.flatMap((g) => g.terms);
 const anchor = (term: string) => term.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
-const title = `Flag terms explained: a glossary of ${all.length} vexillology words`;
 const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.text }));
 ---
 
-<Page
-  site={site}
-  title={title}
+<Base
+  title={`Flag terms explained: a glossary of ${all.length} vexillology words`}
   description="What hoist, fly, canton, saltire, fess, pale, pall, fimbriation and the rule of tincture mean, in plain English, with pictures. A glossary of flag terms for worldbuilders."
-  crumbs={[{ name: 'Glossary', path: '/glossary/' }]}
+  crumb={{ name: 'Glossary', path: '/glossary/' }}
   jsonld={[definedTermSet(site, { name: 'Glossary of flag terms', path: '/glossary/', terms })]}
 >
-  <PageHead site={site} kicker="Glossary" title="Flag terms explained">
-    <Fragment slot="lead">
-      Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean, in plain English. Every picture opens in the{' '}
-      <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the pieces make a good flag.
-    </Fragment>
-    <a slot="art" href={simpleLink(head)} aria-label="Open this flag in the flag maker"><Flag flag={fromSimple(head)} id="g-head" title="A flag with a canton and a charge" /></a>
-  </PageHead>
+  <div class="page">
+    <p class="crumbs"><a href="/">Flag maker</a> › Glossary</p>
+    <div class="prose">
+      <h1>Flag terms explained</h1>
+      <p class="lede">
+        Vexillology borrows its vocabulary from heraldry, which borrowed it from medieval French. Here is what the words mean,
+        in plain English. Every picture opens in the <a href="/">maker</a>; the <a href="/guide/">guide</a> shows how the
+        pieces make a good flag.
+      </p>
 
-  <div class="eu-article">
-    <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
-    <Figure caption="The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.">
-      <svg viewBox="0 0 640 360" role="img" aria-label="The parts of a flag: the hoist is the half nearest the pole, the fly the half furthest from it, the canton the upper quarter at the hoist; the field is the background and a charge is a figure placed on it.">
-        <rect x="24" y="10" width="10" height="340" rx="5" fill="#f4900c"></rect>
-        <circle cx="29" cy="12" r="9" fill="#ffcc4d"></circle>
-        <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
-        <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
-        <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
-        <path d={`M319 30V320`} stroke={night} stroke-width="2" stroke-dasharray="6 6"></path>
-        <g font-family={tokens.type.families.sans} font-weight="700" font-size="26" fill={night} text-anchor="middle">
-          <text x="176" y="108" fill="#ffffff">Canton</text>
-          <text x="176" y="262">Hoist</text>
-          <text x="462" y="290">Fly</text>
-          <text x="462" y="100">Charge</text>
-          <text x="560" y="58">Field</text>
-        </g>
-      </svg>
-    </Figure>
-    <Toc items={groups.map((g) => ({ id: g.id, label: g.title }))} heading="Sections" />
-  </div>
+      <!-- The parts of a flag, drawn: the pole on the left, as flags are always described. -->
+      <figure class="anatomy">
+        <svg viewBox="0 0 640 360" role="img" aria-label="The parts of a flag: the hoist is the half nearest the pole, the fly the half furthest from it, the canton the upper quarter at the hoist; the field is the background and a charge is a figure placed on it.">
+          <rect x="24" y="10" width="10" height="340" rx="5" fill="#f4900c"></rect>
+          <circle cx="29" cy="12" r="9" fill="#ffcc4d"></circle>
+          <rect x="34" y="30" width="570" height="290" fill="#2698d4"></rect>
+          <rect x="34" y="30" width="285" height="145" fill="#0a1f5c"></rect>
+          <polygon points="462,120 474.3,158 514.3,158 482,181.5 494.3,219.5 462,196 429.7,219.5 442,181.5 409.7,158 449.7,158" fill="#fcd116"></polygon>
+          <path d="M319 30V320" stroke="#fff" stroke-width="2" stroke-dasharray="6 6"></path>
+          <g font-family="system-ui, Arial, sans-serif" font-weight="700" font-size="20" fill="#fff" text-anchor="middle">
+            <text x="176" y="108">Canton</text>
+            <text x="176" y="262">Hoist</text>
+            <text x="462" y="290">Fly</text>
+            <text x="462" y="100">Charge</text>
+            <text x="560" y="58" font-size="16">Field</text>
+          </g>
+        </svg>
+        <figcaption>The pole is on the left: that edge is the hoist. Width is measured along the top, height down the hoist.</figcaption>
+      </figure>
 
-  <div class="groups">
+      <nav class="jump" aria-label="Sections">
+        {groups.map((g) => <a href={`#${g.id}`}>{g.title}</a>)}
+      </nav>
+    </div>
+
     {
       groups.map((g) => (
-        <section id={g.id} class="eu-stack">
-          <div class="eu-prose">
+        <section id={g.id}>
+          <div class="prose">
             <h2>{g.title}</h2>
             <p>{g.intro}</p>
           </div>
-          <dl class="eu-terms">
+          <!-- Each term and its definition, as a list of definitions wants them: the picture is
+               part of the definition and is set to the left of both (see .pic below). -->
+          <dl class="terms">
             {g.terms.map((t) => (
-              <div class="eu-term" id={anchor(t.term)}>
-                <dt>
-                  {t.term}
-                  {t.also && <span class="also">or {t.also}</span>}
-                </dt>
+              <div class:list={['term', t.show && 'pictured']} id={anchor(t.term)}>
+                <dt>{t.term}{t.also && <span class="also">or {t.also}</span>}</dt>
                 <dd>
                   {t.show && (
-                    <div class="eu-term-art">
-                      <a href={simpleLink(t.show)} aria-label={t.open ?? `Open this ${t.term.toLowerCase()} in the flag maker`}>
-                        <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
-                      </a>
-                    </div>
-                  )}
-                  <span>{t.text}</span>
+                    <a class="pic" href={simpleLink(t.show)} aria-label={t.open ?? `Open this ${t.term.toLowerCase()} in the flag maker`}>
+                      <Flag flag={fromSimple(t.show)} id={`g-${anchor(t.term)}`} title={t.term} />
+                    </a>
+                  )}{t.text}
                 </dd>
               </div>
             ))}
@@ -178,30 +158,96 @@ const terms = all.map((t) => ({ id: anchor(t.term), term: t.term, definition: t.
         </section>
       ))
     }
-  </div>
 
-  <div class="eu-next">
-    <div class="eu-next-words">
+    <div class="prose">
+      <p><a class="btn btn-primary cta" href="/">Make your flag</a></p>
       <p>Next: <a href="/guide/">how to design a good flag</a>, or start from a <a href="/templates/">template</a>.</p>
     </div>
-    <a class="eu-btn eu-btn--primary" href="/"><Line icon={lineEdit} /> Make your flag</a>
   </div>
-
-  <Credits slot="inspirations" />
-</Page>
+</Base>
 
 <style>
-  /* Room between one group of terms and the next. */
-  .groups {
-    display: grid;
-    gap: var(--space-8);
-    margin-top: var(--space-8);
+  .anatomy {
+    margin: var(--space-4) 0;
   }
 
-  /* A term's other name, said more quietly beside it. */
-  .also {
-    margin-left: var(--space-1);
+  .anatomy svg {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+  }
+
+  .anatomy figcaption {
+    margin-top: var(--space-2);
     color: var(--ink-muted);
-    font: var(--type-note);
+    font-size: 14px;
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-weight: 600;
+  }
+
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-3) 0 0;
+  }
+
+  /* The card looks as it always did: the picture on the left, the words beside it. The picture
+     now sits inside the definition (a list of definitions may hold nothing but terms and
+     definitions), so it is placed by hand where the row used to put it. */
+  .term {
+    position: relative;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface-raised);
+    scroll-margin-top: var(--space-4);
+  }
+
+  .term:target {
+    border-color: var(--selected);
+    box-shadow: 0 0 0 1px var(--selected);
+  }
+
+  /* Room for the picture (84px, and the gap), and for its height where the words are shorter. */
+  .term.pictured {
+    min-height: calc(3px + 56px + 2 * var(--space-3) + 2px);
+    padding-left: calc(var(--space-3) + 84px + var(--space-3));
+  }
+
+  .pic {
+    position: absolute;
+    top: calc(var(--space-3) + 3px);
+    left: var(--space-3);
+    width: 84px;
+  }
+
+  dt {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .also {
+    margin-left: 4px;
+    color: var(--ink-muted);
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 400px) {
+    .terms {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

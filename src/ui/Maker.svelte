@@ -2,14 +2,18 @@
   import { faMarkdown } from '@fortawesome/free-brands-svg-icons';
   import {
     faBorderNone,
-    faCheck,
     faCircleCheck,
     faCircleInfo,
     faCopy,
+    faDownload,
     faFileExport,
+    faFloppyDisk,
+    faImage,
+    faLink,
     faMagnet,
     faRedo,
     faRotateLeft,
+    faShareNodes,
     faSliders,
     faTriangleExclamation,
     faUndo,
@@ -17,12 +21,9 @@
   } from '@fortawesome/free-solid-svg-icons';
   import type { EurthProfile } from '@eurth/profile';
   import ProfileButtons from '@eurth/profile/ProfileButtons.svelte';
-  import { PICTURE_SIZES, calm, download, fileSlug, pictureFilename, playTones, svgToPicture, toast } from '@eurth/style';
-  import Icon from '@eurth/style/components/Icon.svelte';
-  import Line from '@eurth/style/components/Line.svelte';
+  import { PICTURE_SIZES, calm, copyPicture, copyText, download, fileSlug, pictureFilename, playTones, svgToPicture, toast } from '@eurth/style';
   import RandomButton from '@eurth/style/components/RandomButton.svelte';
-  import ShareButtons from '@eurth/style/components/ShareButtons.svelte';
-  import { lineAlert, lineAlertCircle, lineConfirm, lineConfirmCircle, lineDownloadOutline, type LineIcon } from '@eurth/style/line';
+  import ShareDialog from '@eurth/style/components/ShareDialog.svelte';
   import { onMount, untrack } from 'svelte';
   import { describeFlag } from '../flag/describe';
   import { cleanName, flagData, fromAddress, fromHash, toQuery, type Shared } from '../flag/link';
@@ -35,6 +36,7 @@
   import { review, type Level } from '../flag/review';
   import { defaultSimple, fromSimple, type Simple } from '../flag/simple';
   import AdvancedControls from './AdvancedControls.svelte';
+  import Icon from './Icon.svelte';
   import SimpleControls from './SimpleControls.svelte';
   import Stage from './Stage.svelte';
 
@@ -270,28 +272,16 @@
     setTimeout(() => (flying = false), 500);
   }
 
-  // The button just used shows a tick for a moment, as the share row's do. A download is known
-  // by the kind of file that was asked for.
-  type Kind = 'image/svg+xml' | 'image/png' | 'image/webp' | 'text/markdown';
-  let downloaded = $state<Kind | null>(null);
-  let ticking: ReturnType<typeof setTimeout> | undefined;
-  function left(kind: Kind) {
-    downloaded = kind;
-    clearTimeout(ticking);
-    ticking = setTimeout(() => (downloaded = null), 2000);
-    hoist();
-  }
-
   function saveSvg() {
     download(`<?xml version="1.0" encoding="UTF-8"?>\n${picture.svg}\n`, `${fileName}.svg`, 'image/svg+xml');
-    left('image/svg+xml');
+    hoist();
   }
 
   // The flag in words, for the forum and wikis: its name, description, design check and link.
   const markdown = () => flagMarkdown(flag, { heading: cleanedName ? title : '', link, site: siteName });
   function saveMarkdown() {
     download(`${markdown()}\n`, `${fileSlug(title, 'flag')}.md`, 'text/markdown');
-    left('text/markdown');
+    hoist();
   }
 
   // Named for what the browser really made: Safari answers a request for WebP with a PNG.
@@ -301,11 +291,33 @@
       const made = pictureFilename(fileName, blob, type);
       download(blob, made.filename);
       if (made.note) toast(made.note);
-      left(type);
+      hoist();
     } catch {
       toast('This browser could not make the picture. The SVG download always works.');
     }
   }
+
+  // Save, where it always was. Nothing is stored (CLAUDE.md), so saving is copying the link:
+  // the link holds the whole flag.
+  async function save() {
+    const ok = await copyText(link);
+    toast(ok ? 'Saved in its link, and the link is copied.' : 'Copying was blocked. The link in the address bar holds your flag.');
+    if (ok) hoist();
+  }
+
+  // Copies, with the words Flagwright has always said.
+  async function copied(ok: boolean, yes: string, no: string) {
+    toast(ok ? yes : no);
+    if (ok) hoist();
+  }
+  const copyLink = async () => copied(await copyText(link), 'Link copied: it holds the whole flag.', 'Copying was blocked. The link is in the address bar.');
+  // The picture is handed over as a promise, within the click: Safari asks for that.
+  const copyImage = async () => copied(await copyPicture(drawn()), 'Picture copied.', 'Copying pictures is not allowed here. Download the PNG instead.');
+  const copyDescription = async () => copied(await copyText(`${title}. ${description}`), 'Description copied.', 'Copying was blocked.');
+  const copyMarkdown = async () => copied(await copyText(markdown()), 'Markdown copied: paste it into the forum or a wiki.', 'Copying was blocked.');
+
+  /** The suite's Share window: the Eurth forum first, then the usual places and the device's own share sheet. */
+  let sharing = $state(false);
 
   // The nation's profile file. Flagwright owns its flag section and leaves every other section
   // exactly as it was. The link in it is always the site's own: a profile takes https links only.
@@ -338,153 +350,135 @@
   });
 
   const levelIcon: Record<Level, typeof faCircleCheck> = { good: faCircleCheck, note: faCircleInfo, warn: faTriangleExclamation };
-  // The score's own icon draws itself again whenever the verdict changes.
-  const levelLine: Record<Level, LineIcon> = { good: lineConfirmCircle, note: lineAlertCircle, warn: lineAlert };
   const levelName: Record<Level, string> = { good: 'Good', note: 'Worth a look', warn: 'Problem' };
-  const scoreLevel = $derived<Level>(check.score >= 9 ? 'good' : check.score >= 7 ? 'note' : 'warn');
 </script>
 
 <svelte:window onkeydown={keys} />
 
-<div class="fw-maker">
-  <div class="toolbar">
-    <fieldset class="fw-options">
-      <legend class="eu-visually-hidden">Mode</legend>
-      <label class="eu-pill" data-tip="Four choices: division, overlay, symbol, colours" data-tip-align="start">
+<div class="toolbar">
+  <div class="bar">
+    <fieldset class="modes">
+      <legend class="visually-hidden">Mode</legend>
+      <label class="pill plain" data-tip="Four choices: division, overlay, symbol, colours" data-tip-align="start">
         <input type="radio" name="mode" value="simple" checked={mode === 'simple'} onchange={() => setMode('simple')} />
-        <span class="eu-check">{#if mode === 'simple'}<Line icon={lineConfirm} />{/if}</span>
-        <Icon icon={faWandMagicSparkles} /> Simple
+        <Icon icon={faWandMagicSparkles} /> <span class="steady" data-text="Simple">Simple</span>
       </label>
-      <label class="eu-pill" data-tip="Any number of bands and layers, placed by hand" data-tip-align="start">
+      <label class="pill plain" data-tip="Any number of bands and layers, placed by hand" data-tip-align="start">
         <input type="radio" name="mode" value="advanced" checked={mode === 'advanced'} onchange={() => setMode('advanced')} />
-        <span class="eu-check">{#if mode === 'advanced'}<Line icon={lineConfirm} />{/if}</span>
-        <Icon icon={faSliders} /> Advanced
+        <Icon icon={faSliders} /> <span class="steady" data-text="Advanced">Advanced</span>
       </label>
     </fieldset>
-    <div class="eu-row actions">
+    <div class="actions">
       {#if mode === 'advanced' && touched}
-        <button type="button" class="eu-btn eu-btn--risky" data-click="spin" onclick={startFromSimple} data-tip="Replace this flag with your simple design">
-          <Icon icon={faRotateLeft} /> Start from simple
+        <button class="btn" data-click="spin-back" onclick={startFromSimple} data-tip="Replace this flag with your simple design">
+          <Icon icon={faRotateLeft} /> <span class="wide-only">Start from simple</span>
         </button>
       {/if}
-      <RandomButton onrandom={random} guard={changed} what="flag" />
-      <button type="button" class="eu-btn eu-btn--icon" data-click="swing-left" onclick={undo} disabled={!past.length} aria-label="Undo" data-tip="Undo (Ctrl or ⌘ Z)">
-        <Icon icon={faUndo} />
-      </button>
-      <button type="button" class="eu-btn eu-btn--icon" data-click="swing-right" onclick={redo} disabled={!future.length} aria-label="Redo" data-tip="Redo (Shift Ctrl or ⌘ Z)">
-        <Icon icon={faRedo} />
+      <!-- Random is the suite's button in Flagwright's own look. It rolls at once over a flag that
+           is nobody's work yet; over one that has been changed it turns red when pointed at, says
+           so in its tooltip, and asks before the first roll. The span keeps the tooltip the button
+           has always had for as long as there is nothing to lose. -->
+      <span class="random" data-tip={changed ? undefined : 'A random flag that tries to look good'}>
+        <RandomButton onrandom={random} guard={changed} what="flag" class="btn" />
+      </span>
+      <span class="history">
+        <button class="btn icon-only" data-click="swing-left" onclick={undo} disabled={!past.length} aria-label="Undo" data-tip="Undo (Ctrl or ⌘ Z)">
+          <Icon icon={faUndo} />
+        </button>
+        <button class="btn icon-only" data-click="swing-right" onclick={redo} disabled={!future.length} aria-label="Redo" data-tip="Redo (Shift Ctrl or ⌘ Z)">
+          <Icon icon={faRedo} />
+        </button>
+      </span>
+      <button class="btn btn-primary" data-click="bounce" onclick={save} data-tip="Save: copy the link, which holds the whole flag">
+        <Icon icon={faFloppyDisk} /> Save
       </button>
     </div>
   </div>
+</div>
 
-  <div class="layout">
-    <div class="controls">
-      {#if mode === 'simple'}
-        <SimpleControls bind:simple />
-      {:else}
-        <AdvancedControls bind:flag={advanced} bind:selected />
-      {/if}
-    </div>
+<div class="layout">
+  <div class="controls">
+    {#if mode === 'simple'}
+      <SimpleControls bind:simple />
+    {:else}
+      <AdvancedControls bind:flag={advanced} bind:selected />
+    {/if}
+  </div>
 
-    <div class="side">
-      <section class="eu-card stage-panel" id="stage" aria-label="Your flag">
-        <div class="name">
-          <label class="whose">
-            <span class="eu-visually-hidden">Whose flag is it?</span>
-            <input class="eu-input" type="text" maxlength="60" placeholder="Whose flag is it? A country, a city, a cause…" bind:value={name} autocomplete="off" spellcheck="false" />
-          </label>
-          <a class="eu-btn score {scoreLevel}" href="#check-title" data-tip="Design check: {check.verdict}">
-            <Line icon={levelLine[scoreLevel]} />
-            <span class="eu-visually-hidden">Design check:</span>
-            <span class="eu-data">{check.score}/10</span>
-          </a>
+  <div class="side">
+    <section class="panel stage-panel" id="stage" aria-label="Your flag">
+      <div class="name">
+        <label>
+          <span class="visually-hidden">Whose flag is it?</span>
+          <input type="text" maxlength="60" placeholder="Whose flag is it? A country, a city, a cause…" bind:value={name} autocomplete="off" spellcheck="false" />
+        </label>
+        <a class="score" class:fine={check.score >= 9} class:poor={check.score < 7} href="#check-title" data-tip="Design check: {check.verdict}">
+          <span class="visually-hidden">Design check:</span>
+          {check.score}/10
+        </a>
+      </div>
+      <div class="pole" class:flying>
+        <Stage {flag} {title} desc={description} editable={mode === 'advanced'} bind:selected {guides} {snap} ondelete={(id) => ((advanced.overlays = advanced.overlays.filter((o) => o.id !== id)), (selected = null))} />
+      </div>
+      <div class="under">
+        <p class="blazon"><strong>{title}.</strong> {description}</p>
+        {#if mode === 'advanced'}
+          <span class="stage-tools">
+            <label class="pill plain" data-tip="Centre lines and thirds">
+              <input type="checkbox" bind:checked={guides} />
+              <Icon icon={faBorderNone} /> Guides
+            </label>
+            <label class="pill plain" data-tip="Dragging moves in whole percents">
+              <input type="checkbox" bind:checked={snap} />
+              <Icon icon={faMagnet} /> Snap
+            </label>
+          </span>
+        {/if}
+      </div>
+    </section>
+
+    <div class="extras">
+      <section class="panel" aria-labelledby="check-title">
+        <h2 id="check-title">
+          <Icon icon={faCircleCheck} /> Design check
+          <span class="score" class:fine={check.score >= 9} class:poor={check.score < 7}>{check.score}/10 · {check.verdict}</span>
+        </h2>
+        <div class="sizes" aria-label="The flag at small sizes">
+          <span class="mini" style:width="20px">{@html preview}</span>
+          <span class="mini" style:width="40px">{@html preview}</span>
+          <span class="mini" style:width="84px">{@html preview}</span>
+          <span class="sizes-note">Still clear when it's tiny? Flags are seen from far away.</span>
         </div>
-        <div class="pole" class:flying>
-          <Stage {flag} {title} desc={description} editable={mode === 'advanced'} bind:selected {guides} {snap} ondelete={(id) => ((advanced.overlays = advanced.overlays.filter((o) => o.id !== id)), (selected = null))} />
-        </div>
-        <div class="under">
-          <p class="blazon eu-help"><strong>{title}.</strong> {description}</p>
-          {#if mode === 'advanced'}
-            <span class="eu-row stage-tools">
-              <label class="eu-pill" data-tip="Centre lines and thirds">
-                <input type="checkbox" bind:checked={guides} />
-                <span class="eu-check"><Icon icon={faCheck} /></span>
-                <Icon icon={faBorderNone} /> Guides
-              </label>
-              <label class="eu-pill" data-tip="Dragging moves in whole percents">
-                <input type="checkbox" bind:checked={snap} />
-                <span class="eu-check"><Icon icon={faCheck} /></span>
-                <Icon icon={faMagnet} /> Snap
-              </label>
-            </span>
-          {/if}
-        </div>
+        <ul class="findings">
+          {#each check.findings as finding (finding.id)}
+            <li class={finding.level}>
+              <span class="level-icon"><Icon icon={levelIcon[finding.level]} label={levelName[finding.level]} /></span>
+              <div>
+                <p class="principle">{finding.principle}</p>
+                <p class="text">{finding.text}</p>
+                {#if mode === 'advanced' && finding.layers?.length}
+                  <button class="link" onclick={() => (selected = finding.layers![0]!)}>Show the layer</button>
+                {/if}
+              </div>
+            </li>
+          {/each}
+        </ul>
+        <p class="more">A guide, not a law. <a href="/guide/">The five principles, with examples</a></p>
       </section>
 
-      <div class="extras">
-        <section class="eu-card" aria-labelledby="check-title">
-          <h2 id="check-title" class="eu-card-title">
-            <Icon icon={faCircleCheck} /> Design check
-            <span class="verdict {scoreLevel}"><Line icon={levelLine[scoreLevel]} /> {check.score}/10 · {check.verdict}</span>
-          </h2>
-          <div class="sizes" role="group" aria-label="The flag at small sizes">
-            <span class="fw-flag mini" style:width="20px">{@html preview}</span>
-            <span class="fw-flag mini" style:width="40px">{@html preview}</span>
-            <span class="fw-flag mini" style:width="84px">{@html preview}</span>
-            <span class="eu-help">Still clear when it's tiny? Flags are seen from far away.</span>
-          </div>
-          <ul class="fw-rows findings">
-            {#each check.findings as finding (finding.id)}
-              <li class={finding.level}>
-                <span class="level-icon"><Icon icon={levelIcon[finding.level]} label={levelName[finding.level]} /></span>
-                <div>
-                  <p class="eu-kicker">{finding.principle}</p>
-                  <p>{finding.text}</p>
-                  {#if mode === 'advanced' && finding.layers?.length}
-                    <button type="button" class="eu-btn" onclick={() => (selected = finding.layers![0]!)}>Show the layer</button>
-                  {/if}
-                </div>
-              </li>
-            {/each}
-          </ul>
-          <p class="eu-help">A guide, not a law. <a href="/guide/">The five principles, with examples</a></p>
-        </section>
-
-        <section class="eu-card" aria-labelledby="export-title">
-          <h2 id="export-title" class="eu-card-title"><Icon icon={faCopy} /> Copy and share</h2>
-          <ShareButtons
-            url={link}
-            {title}
-            text={`${cleanedName ? `${title}. ` : ''}${description} Made with ${siteName}.`}
-            description={() => `${title}. ${description}`}
-            {markdown}
-            picture={() => drawn()}
-            heading={cleanedName ? `Share ${title.replace(/^Flag of /, 'the flag of ')}` : 'Share your flag'}
-            said={{ link: 'Link copied: it holds the whole flag.', picture: 'Picture copied.', description: 'Description copied.' }}
-            oncopy={hoist}
-          />
-          <p class="eu-help">The link holds the whole design: copying it is saving it.</p>
-        </section>
-
-        <!-- Copying and saving are two things, so they are two groups, each under its own heading. -->
-        <section class="eu-card" aria-labelledby="save-title">
-          <h2 id="save-title" class="eu-card-title"><Icon icon={faFileExport} /> Save as a file</h2>
-          <div class="eu-row">
-            <button type="button" class="eu-btn" data-click="bounce" onclick={saveSvg} data-tip="Sharp at any size: for wikis and print" data-tip-align="start">
-              <Line icon={downloaded === 'image/svg+xml' ? lineConfirm : lineDownloadOutline} /> SVG
-            </button>
-            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/png')}>
-              <Line icon={downloaded === 'image/png' ? lineConfirm : lineDownloadOutline} /> PNG
-            </button>
-            <button type="button" class="eu-btn" data-click="bounce" onclick={() => savePicture('image/webp')}>
-              <Line icon={downloaded === 'image/webp' ? lineConfirm : lineDownloadOutline} /> WebP
-            </button>
-            <button type="button" class="eu-btn" data-click="bounce" onclick={saveMarkdown} data-tip="The flag in words: for the forum and wikis">
-              {#if downloaded === 'text/markdown'}<Line icon={lineConfirm} />{:else}<Icon icon={faMarkdown} />{/if} Markdown
-            </button>
-            <label class="shape">
-              <span class="eu-visually-hidden">Picture size</span>
-              <select class="eu-select" bind:value={shape}>
+      <section class="panel" aria-labelledby="export-title">
+        <h2 id="export-title"><Icon icon={faFileExport} /> Download &amp; share</h2>
+        <!-- Saving a file and copying are two things, so they are two rows, as they always were. -->
+        <div class="buttons">
+          <button class="btn btn-primary" data-click="bounce" onclick={saveSvg} data-tip="Sharp at any size: for wikis and print" data-tip-align="start">
+            <Icon icon={faDownload} /> SVG
+          </button>
+          <span class="png">
+            <button class="btn" data-click="bounce" onclick={() => savePicture('image/png')}><Icon icon={faImage} /> PNG</button>
+            <button class="btn" data-click="bounce" onclick={() => savePicture('image/webp')}><Icon icon={faImage} /> WebP</button>
+            <label>
+              <span class="visually-hidden">Picture size</span>
+              <select bind:value={shape}>
                 <optgroup label="The flag alone">
                   {#each widths as w (w)}
                     <option value="w{w}">{w} × {Math.round((w * size.H) / size.W)}</option>
@@ -497,53 +491,152 @@
                 </optgroup>
               </select>
             </label>
-          </div>
-          <h3 class="eu-label">Your nation's profile</h3>
-          <div class="eu-row">
-            <ProfileButtons profile={saved} onload={loaded} onerror={refused} />
-          </div>
-          {#if profile}
-            <p class="eu-help">
-              <strong>{profile.meta.nation || 'Your nation'}</strong> is loaded. “Save profile” puts this flag in its file and leaves everything else in it as it was.
-            </p>
-          {/if}
-          {#if !linkFits(profileLink)}
-            <p class="eu-help">This flag has so many layers that its link is too long for a profile file. The file will carry its picture and description; keep the link as well if you want to change the flag later.</p>
-          {/if}
-          <p class="eu-help">
-            The flag is yours. The profile file carries your nation from one Eurth tool to the next. Nothing is kept in this browser or on a server.
+          </span>
+          <button class="btn" data-click="bounce" onclick={saveMarkdown} data-tip="The flag in words: for the forum and wikis"><Icon icon={faMarkdown} /> Markdown</button>
+        </div>
+        <div class="buttons">
+          <button class="btn" onclick={copyLink}><Icon icon={faLink} /> Copy link</button>
+          <button class="btn" onclick={copyImage}><Icon icon={faCopy} /> Copy picture</button>
+          <button class="btn" onclick={copyDescription}><Icon icon={faCopy} /> Copy description</button>
+          <button class="btn" onclick={copyMarkdown}><Icon icon={faMarkdown} /> Copy Markdown</button>
+          <button class="btn" onclick={() => (sharing = true)}><Icon icon={faShareNodes} /> Share</button>
+        </div>
+        <!-- The nation's profile file: the two buttons come from @eurth/profile and wear Flagwright's own button (app.css). -->
+        <div class="buttons">
+          <ProfileButtons profile={saved} onload={loaded} onerror={refused} />
+        </div>
+        {#if profile}
+          <p class="more">
+            <strong>{profile.meta.nation || 'Your nation'}</strong> is loaded. “Save profile” puts this flag in its file and leaves everything else in it as it was.
           </p>
-        </section>
-      </div>
+        {/if}
+        {#if !linkFits(profileLink)}
+          <p class="more">This flag has so many layers that its link is too long for a profile file. The file will carry its picture and description; keep the link as well if you want to change the flag later.</p>
+        {/if}
+        <p class="more">The flag is yours. The link holds the whole design: nothing is stored on a server or in this browser. The profile file carries your nation from one Eurth tool to the next.</p>
+      </section>
     </div>
   </div>
 </div>
 
+<!-- The suite's own window, in the suite's look. -->
+<ShareDialog
+  bind:open={sharing}
+  url={link}
+  {title}
+  text={`${cleanedName ? `${title}. ` : ''}${description} Made with ${siteName}.`}
+  heading={cleanedName ? `Share ${title.replace(/^Flag of /, 'the flag of ')}` : 'Share your flag'}
+  oncopy={hoist}
+/>
+
 <style>
-  .fw-maker {
-    /* The tool's own bar: as tall as its buttons and the room around them. */
-    --bar: calc(var(--size-target) + 2 * var(--space-2));
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  /* The tool's own bar: modes on the left, actions on the right. It stays in view. */
+  @media (max-width: 640px) {
+    .toolbar.toolbar {
+      position: static;
+    }
   }
 
-  /* Modes on the left, actions on the right. */
   .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: var(--space-2) var(--space-4);
+    background: var(--header);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .bar {
+    max-width: calc(1200px - 2 * var(--space-4));
+    margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2) var(--space-4);
-    padding: var(--space-2) 0;
-    background: var(--surface);
+  }
+
+  .modes {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .modes .pill {
+    height: 36px;
   }
 
   .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-2);
   }
 
+  .actions .btn,
+  .actions :global(.btn) {
+    height: 36px;
+  }
+
+  .random {
+    display: inline-flex;
+  }
+
+  /* The tooltip used to hang from the button itself: from inside its 1px edge, and a pixel
+     higher while the button rose under the pointer. It hangs in that same place still. */
+  .random[data-tip]:hover::after {
+    top: calc(100% + 5px);
+    right: 1px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html:not([data-motion='still'])) .random[data-tip]:hover::after {
+      top: calc(100% + 4px);
+    }
+  }
+
+  /* Clicked, the dice tumble as Flagwright's own buttons do (the keyframes are in app.css). */
+  @media (prefers-reduced-motion: no-preference) {
+    .random :global(.eu-btn.eu-clicked .eu-icon) {
+      animation: click-tumble 0.6s cubic-bezier(0.3, 1.2, 0.5, 1);
+    }
+  }
+
+  .history {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  .icon-only {
+    justify-content: center;
+    width: 36px;
+    padding: 0;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn:disabled:hover {
+    background: var(--button);
+    border-color: transparent;
+  }
+
+  @media (max-width: 640px) {
+    .wide-only {
+      display: none;
+    }
+  }
+
   .layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-4);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -563,26 +656,33 @@
 
   .stage-panel {
     --stage-h: 24vh;
-    position: sticky;
-    top: var(--space-2);
-    z-index: 3;
     order: -1;
-    /* A band of the page's own colour around the panel, so what scrolls under it doesn't show at its corners. */
-    outline: var(--space-2) solid var(--surface);
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-2));
+    z-index: 3;
+    box-shadow: 0 0 0 var(--space-2) var(--surface);
   }
 
   @media (max-width: 899px) {
-    .fw-maker :global(.eu-card) {
-      padding: var(--space-4);
-    }
-
-    .fw-maker .stage-panel {
-      gap: var(--space-2);
+    .stage-panel {
       padding: var(--space-2);
     }
 
     .blazon {
       display: none;
+    }
+
+    .name {
+      margin-bottom: var(--space-2);
+    }
+
+    .name input {
+      padding: 3px 8px;
+    }
+
+    .under {
+      justify-content: flex-end;
+      margin-top: var(--space-2);
     }
 
     .under:not(:has(.stage-tools)) {
@@ -591,13 +691,6 @@
   }
 
   @media (min-width: 900px) {
-    /* The bar stays in view, and the flag under it. */
-    .toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -613,10 +706,10 @@
     }
 
     .stage-panel {
-      --stage-h: 40vh;
-      top: var(--bar);
+      --stage-h: 46vh;
       order: 0;
-      outline-width: var(--space-4);
+      top: calc(var(--nav-height) + var(--space-3));
+      box-shadow: 0 0 0 var(--space-3) var(--surface);
     }
   }
 
@@ -624,53 +717,218 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    margin-bottom: var(--space-3);
   }
 
-  .whose {
+  .name label {
     flex: 1;
     min-width: 0;
   }
 
-  .whose input {
-    font-weight: 700;
+  .name input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    font-size: 16px;
+    font-weight: 600;
   }
 
-  .whose input::placeholder {
+  .name input::placeholder {
     font-weight: 400;
   }
 
-  /* The score, said three ways: a number, an icon and a colour. */
-  .score.good,
-  .verdict.good,
-  .good .level-icon {
-    color: var(--success-text);
+  .under {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-3);
   }
 
-  .score.note,
-  .verdict.note,
-  .note .level-icon {
-    color: var(--caution-text);
+  .under:empty {
+    display: none;
   }
 
-  .score.warn,
-  .verdict.warn,
-  .warn .level-icon {
-    color: var(--danger-text);
+  .blazon {
+    flex: 1 1 260px;
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 13px;
   }
 
-  .score:hover {
+  .blazon strong {
     color: var(--ink);
   }
 
-  .verdict {
+  .stage-tools {
     display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    margin-left: auto;
-    font: var(--type-label);
+    gap: 6px;
   }
 
-  /* The signature touch: the flag catches the wind for a moment (see hoist()). */
+  .stage-tools .pill {
+    font-size: 13px;
+  }
+
+  h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-size: 16px;
+  }
+
+  a.score {
+    margin-left: 0;
+    text-decoration: none;
+  }
+
+  .score {
+    margin-left: auto;
+    padding: 1px 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .score.fine {
+    border-color: var(--good);
+    color: var(--good);
+  }
+
+  .score.poor {
+    border-color: var(--unusual);
+    color: var(--unusual);
+  }
+
+  .sizes {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .mini {
+    display: block;
+    flex: none;
+    overflow: hidden;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px var(--line-strong);
+    line-height: 0;
+  }
+
+  .mini :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .sizes-note {
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  .findings {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .findings li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: var(--space-2);
+  }
+
+  .level-icon {
+    padding-top: 2px;
+    font-size: 16px;
+  }
+
+  .good .level-icon {
+    color: var(--good);
+  }
+
+  .note .level-icon {
+    color: var(--unusual);
+  }
+
+  .warn .level-icon {
+    color: var(--danger);
+  }
+
+  .principle {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .text {
+    margin: 0;
+  }
+
+  .link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-text);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .more {
+    margin: var(--space-3) 0 0;
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .buttons + .buttons {
+    margin-top: var(--space-2);
+  }
+
+  .png {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .png select {
+    height: 100%;
+    padding: 5px 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+  }
+
+  /* The list now also holds the suite's sharing sizes, whose names are longer. Where the browser
+     can, the box stays as wide as it always was (the width of "3840 × 2560") and grows only
+     when one of the longer names is chosen. */
+  @supports (field-sizing: content) {
+    .png select {
+      field-sizing: content;
+      min-width: 125px;
+    }
+  }
+
+  /* The signature touch: the flag catches the wind for a moment when it leaves (see hoist()). */
   .pole {
     transform-origin: 0 50%;
   }
@@ -687,58 +945,5 @@
     65% {
       transform: skewY(1.5deg) scaleX(0.99);
     }
-  }
-
-  .under {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: start;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-3);
-  }
-
-  .blazon {
-    flex: 1 1 calc(6 * var(--size-target));
-  }
-
-  .blazon strong {
-    color: var(--ink);
-  }
-
-  .stage-tools {
-    gap: var(--space-2);
-  }
-
-  .sizes {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .mini {
-    flex: none;
-  }
-
-  .mini :global(svg) {
-    height: auto;
-  }
-
-  .findings {
-    gap: var(--space-3);
-  }
-
-  .findings li {
-    display: grid;
-    grid-template-columns: var(--space-5) minmax(0, 1fr);
-    gap: var(--space-2);
-  }
-
-  .findings .eu-btn {
-    margin-top: var(--space-2);
-  }
-
-  .shape {
-    flex: 1 1 calc(4 * var(--size-target));
-    min-width: 0;
   }
 </style>

@@ -1,17 +1,16 @@
 ---
 // The maker, and under it what search engines and newcomers both want: what it is, how to use
 // it, and answers to the usual questions (also given to search engines as structured data).
+import { faBookAtlas, faSwatchbook, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { faqPage, webApplication } from '@eurth/style/build';
-import Line from '@eurth/style/components/Line.astro';
-import Page from '@eurth/style/components/Page.astro';
-import { lineCompass, lineGrid3, lineList } from '@eurth/style/line';
 import { site } from '../../eurth.config.mjs';
-import Credits from '../components/Credits.astro';
+import Fa from '../components/Fa.astro';
 import Flag from '../components/Flag.astro';
 import { emblems } from '../flag/emblems';
 import { simpleLink } from '../flag/link';
 import { fromSimple } from '../flag/simple';
 import { templates } from '../flag/templates';
+import Base from '../layouts/Base.astro';
 import Maker from '../ui/Maker.svelte';
 
 const steps = [
@@ -80,53 +79,61 @@ const featureList = [
   'Works offline',
 ];
 const picks = templates.slice(0, 6);
+
+// How to make a flag, step by step, for search engines.
+const howTo = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to make a flag online',
+  totalTime: 'PT2M',
+  step: steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
+};
 ---
 
-<Page site={site} jsonld={[webApplication(site, { featureList, screenshot: `${site.url}/og.png` }), faqPage(faq)]}>
-  <div class="eu-stack">
-    <header class="eu-stack intro">
-      <p class="eu-kicker">Flagwright, by Eurth</p>
-      <h1>Flag maker: design a flag for your country, city or cause</h1>
-      <p class="eu-lead">
-        Four choices in <strong>Simple</strong> mode, every layer by hand in <strong>Advanced</strong>. Free, in your browser, no account needed. Download as SVG or PNG.
-      </p>
-    </header>
+<Base jsonld={[webApplication(site, { featureList, screenshot: `${site.url}/og.png` }), howTo, faqPage(faq)]}>
+  <div class="hero">
+    <h1>Flag maker: design a flag for your country, city or cause</h1>
+    <p>
+      Four choices in <strong>Simple</strong> mode, every layer by hand in <strong>Advanced</strong>. Free, in your browser, no
+      account. Download as SVG or PNG.
+    </p>
+  </div>
 
-    <!-- client:load draws the maker as real HTML first, then wakes it up. -->
-    <Maker client:load siteName={site.name} siteUrl={site.url} />
+  <!-- client:load draws the maker as real HTML first, then wakes it up. -->
+  <Maker client:load siteName={site.name} siteUrl={site.url} />
 
-    <section class="eu-prose">
+  <div class="page">
+    <div class="prose">
       <h2 id="how">How to make a flag</h2>
-      <ol>
+      <ol class="steps">
         {steps.map((s) => <li><strong>{s.name}.</strong> {s.text}</li>)}
       </ol>
       <p>
-        Want more control? Switch to <strong>Advanced</strong>: your simple flag opens as bands and layers you can move, resize, turn, restack and recolour one by one. Drag a layer on the flag, or type exact numbers.
+        Want more control? Switch to <strong>Advanced</strong>: your simple flag opens as bands and layers you can move, resize,
+        turn, restack and recolour one by one. Drag a layer on the flag, or type exact numbers.
       </p>
-    </section>
+    </div>
 
-    <section class="eu-stack">
-      <h2 id="start">Start from a classic layout</h2>
-      <ul class="picks">
-        {
-          picks.map((t) => (
-            <li>
-              <a class="eu-card" href={simpleLink(t.simple)}>
-                <Flag flag={fromSimple(t.simple)} id={`pick-${t.id}`} title={t.name} />
-                <span>{t.name}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="eu-row">
-        <a class="eu-btn" href="/templates/"><Line icon={lineGrid3} /> All {templates.length} templates</a>
-        <a class="eu-btn" href="/guide/"><Line icon={lineCompass} /> How to design a good flag</a>
-        <a class="eu-btn" href="/glossary/"><Line icon={lineList} /> Flag terms explained</a>
-      </p>
-    </section>
+    <h2 id="start" class="section">Start from a classic layout</h2>
+    <ul class="picks">
+      {
+        picks.map((t) => (
+          <li>
+            <a href={simpleLink(t.simple)}>
+              <Flag flag={fromSimple(t.simple)} id={`pick-${t.id}`} title={t.name} />
+              <span>{t.name}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="links">
+      <a class="btn" href="/templates/"><Fa icon={faSwatchbook} /> All {templates.length} templates</a>
+      <a class="btn" href="/guide/"><Fa icon={faWandMagicSparkles} /> How to design a good flag</a>
+      <a class="btn" href="/glossary/"><Fa icon={faBookAtlas} /> Flag terms explained</a>
+    </p>
 
-    <section class="eu-prose">
+    <div class="prose">
       <h2 id="questions">Questions</h2>
       {
         faq.map((f) => (
@@ -136,63 +143,88 @@ const picks = templates.slice(0, 6);
           </details>
         ))
       }
-    </section>
+    </div>
   </div>
-
-  <Credits slot="inspirations" />
-</Page>
+</Base>
 
 <style>
-  .intro {
-    gap: var(--space-2);
+  .hero {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .hero p {
+    max-width: 760px;
+    margin: var(--space-1) 0 0;
+    color: var(--ink-muted);
+  }
+
+  .section {
+    margin: var(--space-8) 0 var(--space-3);
+    font-size: 21px;
+  }
+
+  .steps {
+    padding-left: 1.3em;
+  }
+
+  .steps li {
+    margin-bottom: var(--space-2);
   }
 
   .picks {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(3 * var(--size-target) + var(--space-6)), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .picks .eu-card {
-    padding: var(--space-3);
-    font: var(--type-label);
+  .picks a {
+    display: grid;
+    gap: var(--space-2);
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .picks a:hover span:last-child {
+    color: var(--accent-text);
+    text-decoration: underline;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+  }
+
+  .links .btn {
+    text-decoration: none;
   }
 
   .faq {
-    margin-top: 0;
     border-bottom: 1px solid var(--line);
   }
 
   .faq summary {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: var(--size-target);
-    padding: var(--space-2) 0;
-    font: var(--type-heading);
+    padding: var(--space-3) 0;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
   }
 
-  .faq summary::before {
-    content: '+';
-    flex: none;
-    width: var(--space-4);
-    color: var(--ink-muted);
-    text-align: center;
-  }
-
-  .faq[open] summary::before {
-    content: '−';
-  }
-
-  .faq summary::-webkit-details-marker {
-    display: none;
-  }
-
   .faq p {
-    margin: 0 0 var(--space-4) var(--space-6);
+    margin: 0 0 var(--space-3);
   }
 </style>
