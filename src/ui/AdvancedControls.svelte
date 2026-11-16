@@ -127,7 +127,7 @@
 </script>
 
 <section class="eu-card" aria-labelledby="adv-ratio-title">
-  <h2 id="adv-ratio-title" class="fw-heading"><Icon icon={faRulerCombined} /> Proportions</h2>
+  <h2 id="adv-ratio-title" class="eu-card-title"><Icon icon={faRulerCombined} /> Proportions</h2>
   <div class="ratio">
     <label class="common">
       <span class="eu-visually-hidden">Common proportions</span>
@@ -155,7 +155,7 @@
 </section>
 
 <section class="eu-card" aria-labelledby="adv-field-title">
-  <h2 id="adv-field-title" class="fw-heading"><Icon icon={faBorderAll} /> Field</h2>
+  <h2 id="adv-field-title" class="eu-card-title"><Icon icon={faBorderAll} /> Field</h2>
   <fieldset class="fw-options">
     <legend class="eu-visually-hidden">How the field is divided</legend>
     {#each kinds as k (k.id)}
@@ -215,7 +215,7 @@
 </section>
 
 <section class="eu-card" aria-labelledby="adv-layers-title">
-  <h2 id="adv-layers-title" class="fw-heading"><Icon icon={faLayerGroup} /> Layers <span class="fw-count">{flag.overlays.length}</span></h2>
+  <h2 id="adv-layers-title" class="eu-card-title"><Icon icon={faLayerGroup} /> Layers <span class="eu-count">{flag.overlays.length}</span></h2>
   <p class="eu-help">Everything laid over the field, topmost first. Click a layer here or on the flag to change it; drag it on the flag to move it.</p>
 
   <div class="eu-row">

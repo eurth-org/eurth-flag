@@ -421,7 +421,7 @@
 
       <div class="extras">
         <section class="eu-card" aria-labelledby="check-title">
-          <h2 id="check-title" class="fw-heading">
+          <h2 id="check-title" class="eu-card-title">
             <Icon icon={faCircleCheck} /> Design check
             <span class="verdict {scoreLevel}"><Line icon={levelLine[scoreLevel]} /> {check.score}/10 · {check.verdict}</span>
           </h2>
@@ -449,7 +449,7 @@
         </section>
 
         <section class="eu-card" aria-labelledby="export-title">
-          <h2 id="export-title" class="fw-heading"><Icon icon={faFileExport} /> Share and download</h2>
+          <h2 id="export-title" class="eu-card-title"><Icon icon={faFileExport} /> Share and download</h2>
           <ShareButtons
             url={link}
             {title}

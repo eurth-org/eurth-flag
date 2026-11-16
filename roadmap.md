@@ -44,6 +44,7 @@ Flagwright moves onto `@eurth/style`, the shell every Eurth tool shares, and `@e
 - **For search engines:** the start page's title in the suite's pattern, a description of its own on every page, structured data from the suite's builders (WebApplication, FAQPage, BreadcrumbList, Article, DefinedTermSet), `llms.txt`, and sources with a last-updated date on the guide. The hand-written HowTo and CollectionPage data went: the suite has no builder for them.
 - **Offline and install:** the suite's service worker, web manifest, Install button and offline note.
 - **The kit:** `eurth(site)` in `astro.config.mjs` writes the security headers, the service worker, the manifest, `robots.txt` and `llms.txt`; `standardSuites` replaces Flagwright's own contrast and header tests; `npm run axe` (WCAG 2.2 A, AA and AAA rules, both themes) and `npm run smoke` (real Chrome under the real headers); CI and a nightly rebuild from the suite's reusable workflows; no workers.dev address.
+- On `@eurth/style` 1.5.0: the numbered section headings use the shared `eu-card-title`, `eu-step` and `eu-count` (Flagwright's own were the model for them), the suite's scroll line runs along the top of every page, and the build keeps the space beside a link where the source breaks a line: the footer of 0.1.0 read "byOrioni forEurth".
 
 ## 12 November 2026: preview (0.1.0)
 

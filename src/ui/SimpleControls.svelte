@@ -57,7 +57,7 @@
 </script>
 
 <section class="eu-card" aria-labelledby="division-title">
-  <h2 id="division-title" class="fw-heading"><span class="fw-step">1</span><Icon icon={faBorderAll} /> Division</h2>
+  <h2 id="division-title" class="eu-card-title"><span class="eu-step">1</span><Icon icon={faBorderAll} /> Division</h2>
   <p class="eu-help">How the field is divided. Pick a layout, then its colours.</p>
   <div class="fw-tiles" role="radiogroup" aria-label="Division">
     {#each divisionPresets as preset (preset.id)}
@@ -77,7 +77,7 @@
 </section>
 
 <section class="eu-card" aria-labelledby="overlay-title">
-  <h2 id="overlay-title" class="fw-heading"><span class="fw-step">2</span><Icon icon={faLayerGroup} /> Overlay</h2>
+  <h2 id="overlay-title" class="eu-card-title"><span class="eu-step">2</span><Icon icon={faLayerGroup} /> Overlay</h2>
   <p class="eu-help">One bold shape over the field: a cross, a canton, a triangle. Or none.</p>
   <div class="fw-tiles" role="radiogroup" aria-label="Overlay">
     {#each overlayPresets as preset (preset.id)}
@@ -95,7 +95,7 @@
 </section>
 
 <section class="eu-card" aria-labelledby="symbol-title">
-  <h2 id="symbol-title" class="fw-heading"><span class="fw-step">3</span><Icon icon={faStar} /> Symbol</h2>
+  <h2 id="symbol-title" class="eu-card-title"><span class="eu-step">3</span><Icon icon={faStar} /> Symbol</h2>
   <p class="eu-help">One charge that says who flies it. {emblems.length + symbolPresets.length - 1} to choose from.</p>
   <div class="fw-tiles fw-tiles--small" role="radiogroup" aria-label="Drawn symbols">
     {#each symbolPresets as preset (preset.id)}
@@ -166,7 +166,7 @@
 </section>
 
 <section class="eu-card" aria-labelledby="ratio-title">
-  <h2 id="ratio-title" class="fw-heading"><span class="fw-step">4</span><Icon icon={faRulerCombined} /> Proportions</h2>
+  <h2 id="ratio-title" class="eu-card-title"><span class="eu-step">4</span><Icon icon={faRulerCombined} /> Proportions</h2>
   <p class="eu-help">Height to width. 2:3 is the most common; 1:2 is long, in the British manner.</p>
   <fieldset class="fw-options">
     <legend class="eu-visually-hidden">Proportions</legend>

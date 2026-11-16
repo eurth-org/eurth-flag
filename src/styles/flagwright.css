@@ -24,36 +24,6 @@
   border-radius: 0;
 }
 
-/* A panel's heading: an icon, a few words, and sometimes a count or a score at the far end. */
-.fw-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  font: var(--type-heading);
-}
-
-.fw-count {
-  padding: 0 var(--space-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  color: var(--ink-muted);
-  font: var(--type-note);
-}
-
-/* The number of a step in simple mode. */
-.fw-step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--space-6);
-  height: var(--space-6);
-  border-radius: var(--radius-full);
-  background: var(--selected);
-  color: var(--on-selected);
-  font: var(--type-label);
-}
-
 /* Tiles: options shown as small pictures. Each tile is a label around a radio button, or a
    button; the chosen one gets a thicker edge and a tick, so the choice never rests on colour. */
 .fw-tiles {
