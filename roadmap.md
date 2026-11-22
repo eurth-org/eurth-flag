@@ -7,6 +7,7 @@ Three parts: what comes next, what each release added (newest first), and what's
 ## Next
 
 - **The flag in front of the name:** Flagwright's own mark, the flag with the Eurth yurt on it, stands in front of "Flagwright" in the suite's header (`@eurth/style` 1.7.0, the `mark` slot) and still catches the wind when the name is pointed at. The row that held the flag and the Preview badge on their own is gone, and the badge with it.
+- **"With thanks":** the footer opens with that heading again (`@eurth/style` 1.9.0), with Flagwright's own lines back in it, each with its icon: Scrontch's Flag Designer and FlagMaker Jr., Ted Kaye's five principles, and whose the flags and emblems are. The header's and footer's edges line up with the tool's (`--eu-gutter`, 1.10.0).
 - **Automatic deploys:** check that the organisation's `CLOUDFLARE_API_TOKEN` secret reaches this repository; without it the deploy step is skipped with a warning, and releases are deployed by hand with `npm run deploy`.
 - **Launch:** submit the sitemap in Search Console, add Flagwright to status.eurth.org and Eurth's Worldbuilding Tools docs, and announce it on the forum and Discord.
 - **Heraldic charges drawn for Flagwright:** lion, eagle, fleur-de-lis, sword, trident, laurel wreath, hammer and sickle. Font Awesome has none of them, and flags want them.
