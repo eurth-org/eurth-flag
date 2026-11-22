@@ -1,14 +1,20 @@
 ---
-// Flagwright's own inspirations, for the footer's "inspirations" slot on every page.
+// Flagwright's own lines of the footer's "With thanks", as it has always had them: for the
+// suite's "thanks" slot on every page (layouts/Base.astro).
+import { faCodeBranch, faIcons, faLandmark } from '@fortawesome/free-solid-svg-icons';
 import { ref } from '@eurth/style/build';
+import ThanksItem from '@eurth/style/components/ThanksItem.astro';
 import { site } from '../../eurth.config.mjs';
 
 const out = (href: string) => ref(href, site.host);
 ---
 
-<Fragment>
-  Flagwright takes after two tools that taught a generation of worldbuilders to make flags,{' '}
-  <a href={out('https://scrontch.eu/flags/')}>Scrontch’s Flag Designer</a> by Lars Ruoff and{' '}
-  <a href={out('https://andrewsarnold.github.io/FlagMaker-Jr/')}>FlagMaker Jr.</a> by Andrew Arnold. Its design check follows the five principles Ted Kaye set out in
-  <cite>Good Flag, Bad Flag</cite> for the <a href={out('https://nava.org')}>North American Vexillological Association</a>: a guide, not a law.
-</Fragment>
+<ThanksItem icon={faCodeBranch}>
+  Inspired by two tools that taught a generation of worldbuilders to make flags: <a href={out('https://scrontch.eu/flags/')}>Scrontch’s Flag Designer</a> by Lars Ruoff (2011) and <a href={out('https://andrewsarnold.github.io/FlagMaker-Jr/')}>FlagMaker Jr.</a> by Andrew Arnold.
+</ThanksItem>
+<ThanksItem icon={faLandmark}>
+  The design check follows <a href="/guide/">five principles</a> flag people have argued over for decades, set out by Ted Kaye in <cite>Good Flag, Bad Flag</cite> for the <a href={out('https://nava.org')}>North American Vexillological Association</a>. A guide, not a law.
+</ThanksItem>
+<ThanksItem icon={faIcons}>
+  The flags you make are yours: Flagwright keeps no copy and claims no rights to them. Emblems from the library stay under Font Awesome’s CC BY 4.0, which asks for a credit.
+</ThanksItem>

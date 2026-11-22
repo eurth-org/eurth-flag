@@ -1,6 +1,12 @@
 /* The page around the tool, inside the .fw wrapper (layouts/Base.astro): the written pages. The blue bars, the name and tagline,
    the thanks and the skip link that used to be here are the suite's now (@eurth/style). */
 
+/* The suite's header and footer keep Flagwright's own gutter, so their edges line up with the
+   tool's (@eurth/style reads --eu-gutter). */
+:root {
+  --eu-gutter: 16px;
+}
+
 /* On wide screens, the bars' contents line up with the page below instead of the screen's edges. */
 :where(.fw) .bar {
   max-width: calc(1200px - 2 * var(--space-4));
